@@ -1,0 +1,20 @@
+项目人生系统 · 随插件附带的字体
+==============================
+
+以下字体都以 SIL Open Font License 1.1 发布，可以免费使用、随软件分发。
+插件里的文件是拉丁字符子集，格式为 WOFF2，字形本身没有改动；中文仍使用系统字体。
+文件取自 Fontsource（https://fontsource.org），原始字体来自 Google Fonts 官方仓库 https://github.com/google/fonts 。
+
+■ Michroma
+  文件：wide.woff2
+  用途：对话主界面的大标题「PROJECT LIFE」、小标签和数字
+  作者：Vernon Adams
+  来源：https://github.com/google/fonts/tree/main/ofl/michroma
+
+■ Marcellus
+  文件：roman.woff2
+  用途：对话主界面左栏的大号数字和标题里的西文字符
+  作者：Brian J. Bonislawsky (Astigmatic)
+  来源：https://github.com/google/fonts/tree/main/ofl/marcellus
+
+SIL Open Font License 1.1 全文：https://openfontlicense.org
