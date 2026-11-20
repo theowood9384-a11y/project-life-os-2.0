@@ -1,0 +1,32 @@
+{
+  "folders": [],
+  "notes": [],
+  "trash": [],
+  "tags": [],
+  "isWatching": false,
+  "watchFolder": "",
+  "watchInterval": 30000,
+  "viewMode": "grid",
+  "defaultStyle": "classic",
+  "notePositions": {},
+  "saveMode": "singleFile",
+  "targetFile": "我的任务.md",
+  "autoShowOverdue": false,
+  "excludeFiles": [
+    "收藏夹.md",
+    "习惯追踪",
+    "我的任务.md",
+    "我的闪念.md",
+    "习惯追踪.md"
+  ],
+  "scanVaultTasks": false,
+  "scanExcludeFolders": [
+    "00-后台",
+    "03-行动"
+  ],
+  "lastVaultScan": null,
+  "myTasksFile": "01-捕获/我的任务.md",
+  "syncWithMyTasks": true,
+  "boardStyle": "journal",
+  "paperSound": false
+}

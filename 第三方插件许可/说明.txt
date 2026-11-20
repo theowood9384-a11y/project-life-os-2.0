@@ -1,0 +1,52 @@
+项目人生 OS 附带的第三方 Obsidian 插件
+====================================
+
+以下插件均为原样附带、未经修改，版权归各自作者。完整许可证原文见本文件夹内同名文件。
+AGPL-3.0 插件的对应版本源代码可在下列仓库的同名版本标签处获取。
+
+■ Calendar (Beta)  v2.0.0
+  作者：Liam Cain
+  许可：MIT
+  源码：https://github.com/liamcain/obsidian-calendar-plugin
+  许可证原文：Calendar (Beta)-LICENSE.txt
+
+■ Claudian  v1.3.44
+  作者：Yishen Tu
+  许可：MIT
+  源码：https://github.com/YishenTu/claudian
+  许可证原文：Claudian-LICENSE.txt
+
+■ Dataview  v0.5.68
+  作者：Michael Brenan <blacksmithgu@gmail.com>
+  许可：MIT
+  源码：https://github.com/blacksmithgu/obsidian-dataview
+  许可证原文：Dataview-LICENSE.txt
+
+■ Day Planner  v0.28.0
+  作者：James Lynch, continued by Ivan Lednev
+  许可：MIT
+  源码：https://github.com/ivan-lednev/obsidian-day-planner
+  许可证原文：Day Planner-LICENSE.txt
+
+■ Excalidraw  v2.19.1
+  作者：Zsolt Viczian
+  许可：AGPL-3.0
+  源码：https://github.com/zsviczian/obsidian-excalidraw-plugin/tree/2.19.1
+  许可证原文：Excalidraw-LICENSE.txt
+
+■ QuickAdd  v2.9.4
+  作者：Christian B. B. Houmann
+  许可：MIT
+  源码：https://github.com/chhoumann/quickadd
+  许可证原文：QuickAdd-LICENSE.txt
+
+■ Tasks  v7.22.0
+  作者：Clare Macrae and Ilyas Landikov (created by Martin Schenck)
+  许可：MIT
+  源码：https://github.com/obsidian-tasks-group/obsidian-tasks
+  许可证原文：Tasks-LICENSE.txt
+
+■ 字体（随「捕获便利贴」插件附带）
+  长藏 Long Cang、马善政 Ma Shan Zheng、站酷小薇 ZCOOL XiaoWei、Anton、Space Mono
+  许可：SIL Open Font License 1.1（按常用字裁剪，字形未改）
+  许可证原文：项目人生OS/.obsidian/plugins/capture-notes/fonts/字体许可.txt

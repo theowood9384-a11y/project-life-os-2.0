@@ -1,0 +1,22 @@
+{
+  "projectFolder": "02-项目/1.进行项目",
+  "dailyNotesFolder": "03-行动/日记",
+  "taskFile": "01-捕获/我的任务.md",
+  "captureFolder": "01-捕获",
+  "habitsFile": "01-捕获/习惯追踪.md",
+  "headerImage": "",
+  "projectTemplate": "00-后台/模板/项目模板.md",
+  "attachmentFolder": "00-后台/附件",
+  "openOnStartup": true,
+  "modules": {},
+  "bookmarksFile": "01-捕获/收藏夹.md",
+  "reviewFolder": "04-复盘/周复盘",
+  "reviewTemplate": "00-后台/模板/复盘模板.md",
+  "aiModel": "",
+  "welcomeDismissed": false,
+  "habitColors": {},
+  "fabPos": {
+    "side": "right",
+    "bottom": 28
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "snapStepMinutes": 5,
+  "progressIndicator": "bar",
+  "showTaskNotification": false,
+  "zoomLevel": 2,
+  "timelineIcon": "calendar-with-checkmark",
+  "endLabel": "All done",
+  "startHour": 0,
+  "timelineDateFormat": "YYYY-MM-DD",
+  "centerNeedle": true,
+  "plannerHeading": "📢 今日任务",
+  "plannerHeadingLevel": 2,
+  "timelineColored": false,
+  "timelineStartColor": "#e6e93a",
+  "timelineEndColor": "#9e2bd4",
+  "timestampFormat": "HH:mm",
+  "hourFormat": "H",
+  "dataviewSource": "",
+  "extendDurationUntilNext": false,
+  "defaultDurationMinutes": 60,
+  "minimalDurationMinutes": 10,
+  "showTimestampInTaskBlock": true,
+  "showUncheduledTasks": true,
+  "showUnscheduledNestedTasks": false,
+  "showNow": true,
+  "showNext": true,
+  "pluginVersion": "0.28.0",
+  "showCompletedTasks": true,
+  "showSubtasksInTaskBlocks": true,
+  "icals": [
+    {
+      "name": "Outlook日历",
+      "url": "https://outlook.live.com/owa/calendar/00000000-0000-0000-0000-000000000000/14858e66-dd60-45b2-8f81-3db07f8774b0/cid-6452B870A1D7B8E1/calendar.ics",
+      "color": "#bc2020"
+    }
+  ],
+  "colorOverrides": [
+    {
+      "text": "#red",
+      "darkModeColor": "#9a364e",
+      "color": "#f9d7dc"
+    },
+    {
+      "text": "#blue",
+      "darkModeColor": "#2960aa",
+      "color": "#8bb6ee"
+    },
+    {
+      "text": "#orange",
+      "darkModeColor": "#bc6c10",
+      "color": "#f0d20f"
+    },
+    {
+      "text": "#green",
+      "darkModeColor": "#5f9956",
+      "color": "#bce2b6"
+    },
+    {
+      "text": "#grey",
+      "darkModeColor": "#4c5467",
+      "color": "#dedede"
+    },
+    {
+      "text": "#purple",
+      "darkModeColor": "#522c81",
+      "color": "#d3c4fd"
+    }
+  ],
+  "releaseNotes": true,
+  "taskStatusOnCreation": " ",
+  "eventFormatOnCreation": "task",
+  "sortTasksInPlanAfterEdit": false,
+  "firstDayOfWeek": "monday",
+  "multiDayRange": "3-days",
+  "showTimeTracker": false,
+  "showActiveClocks": false,
+  "editMode": "simple",
+  "copyOnDrag": false,
+  "rawIcals": [
+    {
+      "icalConfig": {
+        "name": "Outlook日历",
+        "url": "https://outlook.live.com/owa/calendar/00000000-0000-0000-0000-000000000000/14858e66-dd60-45b2-8f81-3db07f8774b0/cid-6452B870A1D7B8E1/calendar.ics",
+        "color": "#bc2020"
+      },
+      "text": "BEGIN:VCALENDAR\r\nMETHOD:PUBLISH\r\nPRODID:Microsoft Exchange Server 2010\r\nVERSION:2.0\r\nX-WR-CALNAME:日历\r\nEND:VCALENDAR\r\n"
+    }
+  ]
+}

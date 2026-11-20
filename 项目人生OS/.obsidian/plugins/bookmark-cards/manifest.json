@@ -1,0 +1,10 @@
+{
+  "id": "bookmark-cards",
+  "name": "书签收藏盒",
+  "version": "1.3.0",
+  "minAppVersion": "1.1.0",
+  "description": "以卡片、列表、表格浏览「收藏夹」里的书签，支持标签、拖拽分类与链接检测。",
+  "author": "爱分享的小师兄",
+  "authorUrl": "https://github.com/Cavan-leo/jynoke-obsidian-plugins",
+  "isDesktopOnly": false
+}

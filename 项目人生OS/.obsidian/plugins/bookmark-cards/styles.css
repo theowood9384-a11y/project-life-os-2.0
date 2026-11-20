@@ -1,0 +1,1820 @@
+/* Bookmark Tree Styles (v1.4) */
+
+.clean-cards-view {
+    padding: 0px 16px;
+    /* Reduced top padding */
+    height: 100%;
+    overflow-y: auto;
+    font-family: var(--font-interface);
+}
+
+.clean-cards-actions {
+    margin-top: 12px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* Ensure vertical alignment */
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.view-actions-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.action-btn {
+    background-color: var(--interactive-normal) !important;
+    border: 1px solid var(--background-modifier-border-hover) !important;
+    cursor: pointer;
+    /* Square padding for icon-only buttons */
+    padding: 6px !important;
+    width: 32px !important;
+    /* Fixed square size */
+    height: 32px !important;
+    border-radius: 6px !important;
+    color: var(--text-muted) !important;
+    transition: all 0.2s ease-in-out;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 0.9em !important;
+    line-height: normal !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.action-btn:hover,
+.action-btn.is-active {
+    background-color: var(--interactive-accent);
+    color: var(--text-on-accent);
+    border-color: var(--interactive-accent);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* Lift effect */
+}
+
+.action-btn svg {
+    width: 16px;
+    /* Ensure icon size consistency */
+    height: 16px;
+    opacity: 0.8;
+}
+
+.action-btn:hover svg,
+.action-btn.is-active svg {
+    opacity: 1;
+    stroke: currentColor;
+}
+
+.btn-label {
+    /* Ensure label is visible */
+    white-space: nowrap;
+}
+
+/* Category Container */
+.category-section {
+    margin-bottom: 2px;
+}
+
+/* --- LIST VIEW STYLES --- */
+/* Main Content Container */
+.cards-content-container {
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    /* Ensure vertical stacking */
+    gap: 4px;
+}
+
+/* --- LIST VIEW STYLES --- */
+
+/* Tree Item Container */
+.tree-item {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/* Category & Folder Headers */
+.tree-item-header {
+    display: flex;
+    align-items: center;
+    padding: 6px 8px;
+    /* Slightly more padding */
+    font-size: 0.95rem;
+    /* Slightly larger */
+    color: var(--text-normal);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.1s;
+    user-select: none;
+    width: 100%;
+    /* Full width */
+}
+
+.tree-item-header:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+/* Icons */
+.tree-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    /* Fixed width for alignment */
+    height: 20px;
+    margin-right: 6px;
+    color: var(--text-muted);
+}
+
+.tree-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Items List Container (Children) */
+.tree-item-children {
+    padding-left: 24px;
+    /* Clear indentation */
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid var(--background-modifier-border);
+    /* Visible guide line */
+    margin-left: 9px;
+    /* Align guide line with parent icon center */
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+.tree-item-children.collapsed {
+    display: none;
+}
+
+/* Bookmark Link Item */
+.bookmark-link {
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-decoration: none !important;
+    color: var(--text-normal) !important;
+    font-size: 0.9rem;
+    transition: background 0.1s;
+    width: 100%;
+    /* Full width */
+}
+
+.bookmark-link:hover {
+    background-color: var(--interactive-accent-hover);
+    color: white !important;
+}
+
+.theme-dark .bookmark-link:hover {
+    background-color: var(--background-modifier-hover);
+    color: var(--text-normal) !important;
+}
+
+/* Specific styling for folders vs links */
+.is-folder {
+    font-weight: 600;
+}
+
+.is-link {
+    font-weight: 400;
+}
+
+/* --- GRID VIEW STYLES --- */
+
+.bookmarks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    /* Increased min-width */
+    gap: 20px;
+    /* Increased gap */
+    padding: 8px 0;
+}
+
+.grid-card {
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: var(--background-primary);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    height: 280px;
+    /* Increased height */
+}
+
+.grid-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: var(--interactive-accent);
+}
+
+.card-cover {
+    height: 140px;
+    /* Increased height */
+    background-color: var(--background-secondary);
+    position: relative;
+    border-bottom: 1px solid var(--background-modifier-border);
+    overflow: hidden;
+    /* Ensure image doesn't overflow */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Cover: fill area, crop if needed. Contain: show full image. */
+    object-fit: cover;
+}
+
+.card-cover.no-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-faint);
+    font-size: 2rem;
+}
+
+.card-info {
+    padding: 12px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+    color: var(--text-normal);
+    /* Multi-line truncating */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.card-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    /* Multi-line truncating */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* 可编辑简介样式 */
+.card-desc.editable-desc {
+    cursor: text;
+    border-radius: 4px;
+    padding: 4px 6px;
+    margin: -4px -6px;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+    position: relative;
+}
+
+.card-desc.editable-desc:hover {
+    background-color: var(--background-modifier-hover);
+    box-shadow: inset 0 0 0 1px var(--background-modifier-border);
+}
+
+.card-desc.editable-desc:hover::after {
+    content: '✏️';
+    position: absolute;
+    right: 4px;
+    top: 4px;
+    font-size: 10px;
+    opacity: 0.6;
+}
+
+/* 编辑模式样式 */
+.card-desc.editing {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow: visible;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+    background-color: var(--background-primary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 10;
+}
+
+.desc-edit-textarea {
+    width: 100%;
+    min-height: 40px;
+    max-height: 120px;
+    padding: 6px 8px;
+    font-size: 0.8rem;
+    font-family: var(--font-interface);
+    line-height: 1.4;
+    color: var(--text-normal);
+    background-color: var(--background-primary);
+    border: 1px solid var(--interactive-accent);
+    border-radius: 4px;
+    resize: none;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.desc-edit-textarea:focus {
+    border-color: var(--interactive-accent);
+    box-shadow: 0 0 0 2px var(--interactive-accent-hover);
+}
+
+.desc-edit-textarea::placeholder {
+    color: var(--text-faint);
+}
+
+.desc-edit-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.desc-edit-btn {
+    padding: 3px 10px;
+    font-size: 0.75rem;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s ease;
+}
+
+.desc-edit-btn.save-btn {
+    background-color: var(--interactive-accent);
+    color: var(--text-on-accent);
+}
+
+.desc-edit-btn.save-btn:hover {
+    filter: brightness(1.1);
+}
+
+.desc-edit-btn.cancel-btn {
+    background-color: var(--background-modifier-hover);
+    color: var(--text-muted);
+}
+
+.desc-edit-btn.cancel-btn:hover {
+    background-color: var(--background-modifier-border);
+    color: var(--text-normal);
+}
+
+/* 卡片封面和标题点击样式 */
+.card-cover {
+    cursor: pointer;
+}
+
+.card-title {
+    cursor: pointer;
+}
+
+.card-title:hover {
+    color: var(--interactive-accent);
+}
+
+/* ========================================
+   搜索与过滤样式
+   ======================================== */
+
+.filter-bar {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 8px 0;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+/* 搜索框容器 */
+.search-container {
+    display: flex;
+    align-items: center;
+    background-color: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 8px;
+    padding: 6px 10px;
+    flex: 1;
+    min-width: 200px;
+    max-width: 400px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-container:focus-within {
+    border-color: var(--interactive-accent);
+    box-shadow: 0 0 0 2px var(--interactive-accent-hover);
+}
+
+.search-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    margin-right: 8px;
+}
+
+.search-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.search-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--text-normal);
+    font-size: 0.9rem;
+    outline: none;
+    padding: 2px 0;
+}
+
+.search-input::placeholder {
+    color: var(--text-faint);
+}
+
+.search-clear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.search-clear:hover {
+    background-color: var(--background-modifier-hover);
+    color: var(--text-normal);
+}
+
+.search-clear svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* 分类筛选下拉框 */
+.category-filter-container {
+    display: flex;
+    align-items: center;
+    background-color: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 8px;
+    padding: 6px 10px;
+    transition: border-color 0.2s ease;
+}
+
+.category-filter-container:focus-within {
+    border-color: var(--interactive-accent);
+}
+
+.category-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    margin-right: 8px;
+}
+
+.category-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.category-select {
+    border: none;
+    background: transparent;
+    color: var(--text-normal);
+    font-size: 0.9rem;
+    outline: none;
+    cursor: pointer;
+    padding-right: 8px;
+    min-width: 120px;
+}
+
+.category-select option {
+    background-color: var(--background-primary);
+    color: var(--text-normal);
+}
+
+/* 过滤统计信息 */
+.filter-stats {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+}
+
+.stats-text {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    background-color: var(--background-secondary);
+    padding: 4px 10px;
+    border-radius: 12px;
+}
+
+/* 空状态样式 */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.empty-icon {
+    color: var(--text-faint);
+    margin-bottom: 16px;
+}
+
+.empty-icon svg {
+    width: 48px;
+    height: 48px;
+}
+
+.empty-text {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.empty-hint {
+    font-size: 0.9rem;
+    color: var(--text-faint);
+}
+
+/* 搜索高亮（可选功能预留） */
+.search-highlight {
+    background-color: var(--text-highlight-bg);
+    padding: 0 2px;
+    border-radius: 2px;
+}
+
+/* ========================================
+   拖拽排序样式
+   ======================================== */
+
+/* 分类区域容器 */
+.grid-category-section {
+    margin-bottom: 8px;
+}
+
+/* 分类标题优化 */
+.grid-category-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--text-normal);
+    border-bottom: 2px solid var(--background-modifier-border);
+    padding-bottom: 4px;
+}
+
+.category-count-badge {
+    font-size: 0.75rem;
+    font-weight: normal;
+    color: var(--text-muted);
+    background-color: var(--background-secondary);
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+/* 卡片拖拽手柄 */
+.card-drag-handle {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--background-primary);
+    border-radius: 4px;
+    cursor: grab;
+    opacity: 0;
+    transition: opacity 0.2s ease, background-color 0.2s ease;
+    z-index: 10;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.card-drag-handle:hover {
+    background-color: var(--interactive-accent);
+    color: var(--text-on-accent);
+}
+
+.card-drag-handle:active {
+    cursor: grabbing;
+}
+
+.card-drag-handle svg {
+    width: 14px;
+    height: 14px;
+    color: var(--text-muted);
+}
+
+.card-drag-handle:hover svg {
+    color: var(--text-on-accent);
+}
+
+.grid-card {
+    position: relative;
+}
+
+.grid-card:hover .card-drag-handle {
+    opacity: 1;
+}
+
+/* 拖拽中的卡片样式 */
+.grid-card.dragging {
+    opacity: 0.4;
+    transform: scale(0.98);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+/* 拖放区域激活状态 */
+.droppable-grid.drag-over {
+    background-color: var(--interactive-accent-hover);
+    border-radius: 8px;
+    outline: 2px dashed var(--interactive-accent);
+    outline-offset: -2px;
+    min-height: 100px;
+}
+
+/* 拖放位置指示器 */
+.drop-indicator {
+    width: 4px;
+    height: 280px;
+    background-color: var(--interactive-accent);
+    border-radius: 2px;
+    margin: 0 -2px;
+    animation: pulse 1s ease-in-out infinite;
+    box-shadow: 0 0 8px var(--interactive-accent);
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* 空分类提示 */
+.droppable-grid:empty::after {
+    content: '拖拽书签到此处';
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100px;
+    color: var(--text-faint);
+    font-size: 0.9rem;
+    border: 2px dashed var(--background-modifier-border);
+    border-radius: 8px;
+    grid-column: 1 / -1;
+}
+
+.droppable-grid.drag-over:empty::after {
+    content: '松开以放置书签';
+    border-color: var(--interactive-accent);
+    color: var(--interactive-accent);
+    background-color: var(--interactive-accent-hover);
+}
+
+/* ========================================
+   链接检测样式
+   ======================================== */
+
+/* 失效链接数量徽章 */
+.invalid-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background-color: #e53935;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.action-btn {
+    position: relative;
+}
+
+/* 链接状态指示器 */
+.link-status-indicator {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--background-primary);
+    border-radius: 50%;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 10;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.link-status-indicator svg {
+    width: 14px;
+    height: 14px;
+}
+
+.grid-card:hover .link-status-indicator {
+    opacity: 1;
+}
+
+/* 状态为有效时始终显示绿色勾 */
+.link-status-indicator.status-valid {
+    opacity: 0.8;
+}
+
+.link-status-indicator.status-valid svg {
+    color: #4caf50;
+}
+
+.link-status-indicator.status-valid:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* 状态为失效时始终显示 */
+.link-status-indicator.status-invalid {
+    opacity: 1;
+    background-color: #ffebee;
+}
+
+.link-status-indicator.status-invalid svg {
+    color: #e53935;
+}
+
+.link-status-indicator.status-invalid:hover {
+    transform: scale(1.1);
+}
+
+/* 检测中的加载动画 */
+.link-status-indicator.checking svg {
+    animation: spin 1s linear infinite;
+    color: var(--interactive-accent);
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* 失效链接卡片样式 */
+.grid-card.link-invalid {
+    border-color: #e53935;
+    box-shadow: 0 0 0 1px #e53935;
+}
+
+.grid-card.link-invalid .card-cover {
+    position: relative;
+}
+
+.grid-card.link-invalid .card-cover::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+        rgba(229, 57, 53, 0.1) 0%, 
+        transparent 50%);
+    pointer-events: none;
+}
+
+.grid-card.link-invalid:hover {
+    border-color: #c62828;
+}
+
+/* 有效链接卡片样式（微妙的绿色边框） */
+.grid-card.link-valid {
+    border-color: rgba(76, 175, 80, 0.3);
+}
+
+.grid-card.link-valid:hover {
+    border-color: #4caf50;
+}
+
+/* 设置页面的链接统计样式 */
+.link-stats-container {
+    background-color: var(--background-secondary);
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin: 16px 0;
+}
+
+.link-stats-title {
+    margin: 0 0 4px 0;
+    font-weight: 600;
+    color: var(--text-normal);
+}
+
+.link-stats-detail {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.9em;
+}
+
+/* ========== 更多操作按钮样式 ========== */
+.card-more-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.card-more-btn svg {
+    width: 16px;
+    height: 16px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.grid-card:hover .card-more-btn {
+    opacity: 1;
+}
+
+.card-more-btn:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+    transform: scale(1.05);
+}
+
+.card-more-btn.is-active {
+    opacity: 1;
+    background-color: var(--interactive-accent);
+}
+
+.card-more-btn.is-active svg {
+    color: var(--text-on-accent);
+}
+
+/* ========== 右键菜单样式 ========== */
+.bookmark-context-menu {
+    position: fixed;
+    z-index: 10000;
+    min-width: 160px;
+    background-color: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18), 
+                0 4px 8px rgba(0, 0, 0, 0.1),
+                0 0 1px rgba(0, 0, 0, 0.1);
+    padding: 6px;
+    animation: contextMenuFadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+}
+
+@keyframes contextMenuFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.92) translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.context-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 12px;
+    border-radius: 7px;
+    cursor: pointer;
+    color: var(--text-normal);
+    font-size: 13px;
+    font-weight: 450;
+    transition: all 0.15s ease;
+    user-select: none;
+    pointer-events: auto;
+}
+
+.context-menu-item:hover {
+    background-color: var(--interactive-accent);
+    color: var(--text-on-accent);
+}
+
+.context-menu-item:hover .context-menu-icon {
+    opacity: 1;
+}
+
+.context-menu-item:hover .context-menu-icon svg {
+    color: var(--text-on-accent);
+}
+
+.context-menu-item.danger {
+    color: #e53935;
+}
+
+.context-menu-item.danger:hover {
+    background-color: #e53935;
+    color: white;
+}
+
+.context-menu-item.danger:hover .context-menu-icon svg {
+    color: white;
+}
+
+.context-menu-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    opacity: 0.7;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+}
+
+.context-menu-icon svg {
+    width: 16px;
+    height: 16px;
+    pointer-events: none;
+    transition: color 0.15s ease;
+}
+
+.context-menu-text {
+    flex: 1;
+    pointer-events: none;
+}
+
+.context-menu-separator {
+    height: 1px;
+    background-color: var(--background-modifier-border);
+    margin: 5px 10px;
+}
+
+/* ========== 弹窗样式 ========== */
+.bookmark-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalOverlayFadeIn 0.2s ease-out;
+}
+
+@keyframes modalOverlayFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.bookmark-modal {
+    background-color: var(--background-primary);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    min-width: 320px;
+    max-width: 90vw;
+    animation: modalSlideIn 0.25s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.bookmark-modal-header {
+    padding: 16px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-normal);
+    border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.bookmark-modal-content {
+    padding: 20px;
+}
+
+.bookmark-modal-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 8px;
+    background-color: var(--background-primary);
+    color: var(--text-normal);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
+}
+
+.bookmark-modal-input:focus {
+    border-color: var(--interactive-accent);
+    box-shadow: 0 0 0 2px rgba(var(--interactive-accent-rgb), 0.2);
+}
+
+.bookmark-modal-message {
+    margin: 0 0 8px 0;
+    color: var(--text-normal);
+    font-size: 14px;
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+.bookmark-modal-hint {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.bookmark-modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 20px;
+    border-top: 1px solid var(--background-modifier-border);
+}
+
+.bookmark-modal-btn {
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.bookmark-modal-btn.cancel {
+    background-color: var(--background-modifier-hover);
+    color: var(--text-normal);
+}
+
+.bookmark-modal-btn.cancel:hover {
+    background-color: var(--background-modifier-border);
+}
+
+.bookmark-modal-btn.save {
+    background-color: var(--interactive-accent);
+    color: var(--text-on-accent);
+}
+
+.bookmark-modal-btn.save:hover {
+    filter: brightness(1.1);
+}
+
+.bookmark-modal-btn.danger {
+    background-color: #e53935;
+    color: white;
+}
+
+.bookmark-modal-btn.danger:hover {
+    background-color: #c62828;
+}
+
+/* ===== 标签相关样式 ===== */
+
+/* 标签筛选器容器 */
+.tag-filter-container {
+    position: relative;
+    margin-left: 8px;
+}
+
+.tag-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    background-color: var(--interactive-normal);
+    border: 1px solid var(--background-modifier-border-hover);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.tag-toggle-btn:hover {
+    background-color: var(--background-modifier-hover);
+    color: var(--text-normal);
+}
+
+.tag-icon svg {
+    width: 14px;
+    height: 14px;
+}
+
+.tag-toggle-text {
+    font-weight: 500;
+}
+
+.tag-selected-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background-color: var(--interactive-accent);
+    color: var(--text-on-accent);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.tag-chevron svg {
+    width: 14px;
+    height: 14px;
+    opacity: 0.6;
+}
+
+/* 标签下拉面板 */
+.tag-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 4px;
+    width: 280px;
+    max-height: 400px;
+    background-color: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.tag-search-container {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.tag-search-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 6px;
+    background-color: var(--background-primary);
+    font-size: 13px;
+    color: var(--text-normal);
+}
+
+.tag-search-input:focus {
+    outline: none;
+    border-color: var(--interactive-accent);
+}
+
+/* 已选标签区 */
+.selected-tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--background-modifier-border);
+    background-color: var(--background-secondary);
+}
+
+.selected-tag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background-color: var(--interactive-accent);
+    color: var(--text-on-accent);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.selected-tag-remove {
+    cursor: pointer;
+    opacity: 0.7;
+    display: flex;
+    align-items: center;
+}
+
+.selected-tag-remove:hover {
+    opacity: 1;
+}
+
+.selected-tag-remove svg {
+    width: 12px;
+    height: 12px;
+}
+
+.clear-all-tags-btn {
+    padding: 4px 8px;
+    border-radius: 4px;
+    background-color: var(--background-modifier-hover);
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.clear-all-tags-btn:hover {
+    background-color: var(--background-modifier-border);
+    color: var(--text-normal);
+}
+
+/* 标签列表 */
+.tag-list-container {
+    max-height: 250px;
+    overflow-y: auto;
+    padding: 8px 0;
+}
+
+.tag-list-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.tag-list-item:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+.tag-list-item.is-selected {
+    background-color: var(--interactive-accent-hover);
+}
+
+.tag-checkbox {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--background-modifier-border-hover);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tag-list-item.is-selected .tag-checkbox {
+    background-color: var(--interactive-accent);
+    border-color: var(--interactive-accent);
+}
+
+.tag-checkbox svg {
+    width: 12px;
+    height: 12px;
+    color: var(--text-on-accent);
+}
+
+.tag-name {
+    flex: 1;
+    font-size: 13px;
+    color: var(--text-normal);
+}
+
+.tag-count {
+    font-size: 12px;
+    color: var(--text-muted);
+    background-color: var(--background-modifier-hover);
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.tag-list-empty {
+    padding: 20px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+/* 卡片上的标签 */
+.card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid var(--background-modifier-border);
+}
+
+.card-tag-chip {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background-color: var(--background-modifier-hover);
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.card-tag-chip:hover {
+    background-color: var(--interactive-accent-hover);
+    color: var(--text-normal);
+}
+
+.card-tag-chip.is-active {
+    background-color: var(--interactive-accent);
+    color: var(--text-on-accent);
+}
+
+/* 编辑标签弹窗 */
+.tags-modal {
+    min-width: 380px;
+}
+
+.current-tags-container,
+.add-tag-container,
+.tag-suggestions-container {
+    margin-bottom: 16px;
+}
+
+.tags-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.current-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 32px;
+}
+
+.tags-empty-hint {
+    color: var(--text-muted);
+    font-size: 13px;
+    font-style: italic;
+}
+
+.editable-tag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background-color: var(--interactive-accent);
+    color: var(--text-on-accent);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.tag-remove-btn {
+    cursor: pointer;
+    opacity: 0.7;
+    display: flex;
+    align-items: center;
+    margin-left: 2px;
+}
+
+.tag-remove-btn:hover {
+    opacity: 1;
+}
+
+.tag-remove-btn svg {
+    width: 12px;
+    height: 12px;
+}
+
+.tag-input-row {
+    display: flex;
+    gap: 8px;
+}
+
+.tag-input {
+    flex: 1;
+}
+
+.tag-add-btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    background-color: var(--interactive-accent);
+    color: var(--text-on-accent);
+    font-size: 13px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tag-add-btn:hover {
+    filter: brightness(1.1);
+}
+
+.tag-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.suggestion-tag-chip {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    background-color: var(--background-modifier-hover);
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px dashed var(--background-modifier-border-hover);
+}
+
+.suggestion-tag-chip:hover {
+    background-color: var(--interactive-accent-hover);
+    color: var(--text-normal);
+    border-style: solid;
+}
+
+/* 列表视图中的标签 */
+.tree-item-tags {
+    display: inline-flex;
+    gap: 4px;
+    margin-left: 8px;
+}
+
+.tree-tag-chip {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 3px;
+    background-color: var(--background-modifier-hover);
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 500;
+}
+
+/* ===== 表格视图样式 ===== */
+
+.table-view-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid var(--background-modifier-border);
+    background-color: var(--background-primary);
+}
+
+.bookmarks-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+/* 表头样式 */
+.bookmarks-table thead {
+    background-color: var(--background-secondary);
+    border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.bookmarks-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.bookmarks-table th.sortable {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.bookmarks-table th.sortable:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+.bookmarks-table th.sorted {
+    color: var(--text-normal);
+    background-color: var(--background-modifier-hover);
+}
+
+.th-content {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sort-icon {
+    display: flex;
+    align-items: center;
+    opacity: 0.5;
+}
+
+.bookmarks-table th.sorted .sort-icon {
+    opacity: 1;
+    color: var(--interactive-accent);
+}
+
+.sort-icon svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* 列宽度 */
+.col-title {
+    min-width: 200px;
+    max-width: 350px;
+}
+
+.col-domain {
+    min-width: 120px;
+    max-width: 180px;
+}
+
+.col-category {
+    min-width: 80px;
+    max-width: 120px;
+}
+
+.col-tags {
+    min-width: 120px;
+    max-width: 200px;
+}
+
+.col-status {
+    width: 60px;
+    text-align: center;
+}
+
+.col-actions {
+    width: 80px;
+    text-align: right;
+}
+
+/* 表体样式 */
+.bookmarks-table tbody tr {
+    border-bottom: 1px solid var(--background-modifier-border);
+    transition: background-color 0.15s ease;
+}
+
+.bookmarks-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.bookmarks-table tbody tr:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+.bookmarks-table td {
+    padding: 12px 16px;
+    vertical-align: middle;
+}
+
+/* 标题列 */
+.title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.row-favicon {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.row-title {
+    color: var(--text-normal);
+    text-decoration: none;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+}
+
+.row-title:hover {
+    color: var(--interactive-accent);
+    text-decoration: underline;
+}
+
+/* 域名列 */
+.domain-text {
+    color: var(--text-muted);
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+}
+
+/* 分类列 */
+.category-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    background-color: var(--background-modifier-hover);
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.category-badge:hover {
+    background-color: var(--interactive-accent-hover);
+    color: var(--text-normal);
+}
+
+/* 标签列 */
+.tags-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.table-tag-chip {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background-color: var(--background-modifier-hover);
+    color: var(--text-muted);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.table-tag-chip:hover {
+    background-color: var(--interactive-accent);
+    color: var(--text-on-accent);
+}
+
+.table-tag-more {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background-color: transparent;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-style: italic;
+}
+
+.no-tags {
+    color: var(--text-faint);
+}
+
+/* 状态列 */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+}
+
+.status-badge svg {
+    width: 16px;
+    height: 16px;
+}
+
+.status-badge.status-valid {
+    color: #4caf50;
+}
+
+.status-badge.status-invalid {
+    color: #ff9800;
+}
+
+.status-badge.status-unknown {
+    color: var(--text-faint);
+}
+
+/* 操作列 */
+.actions-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.bookmarks-table tbody tr:hover .actions-wrapper {
+    opacity: 1;
+}
+
+.row-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: all 0.15s ease;
+}
+
+.row-action-btn:hover {
+    background-color: var(--background-modifier-border);
+    color: var(--text-normal);
+}
+
+.row-action-btn.is-active {
+    background-color: var(--interactive-accent);
+    color: var(--text-on-accent);
+}
+
+.row-action-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* 空状态 */
+.empty-row td {
+    padding: 40px 16px;
+}
+
+.table-empty-state {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+/* 表格底部 */
+.table-footer {
+    padding: 12px 16px;
+    border-top: 1px solid var(--background-modifier-border);
+    background-color: var(--background-secondary);
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* 响应式处理 */
+@media (max-width: 768px) {
+    .col-category,
+    .col-status {
+        display: none;
+    }
+    
+    .bookmarks-table th,
+    .bookmarks-table td {
+        padding: 10px 12px;
+    }
+    
+    .col-title {
+        min-width: 150px;
+    }
+}
+
+/* 统计信息中的标签 */
+.stats-tags {
+    color: var(--text-muted);
+    font-size: 12px;
+}
