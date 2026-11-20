@@ -190,6 +190,8 @@ var DEFAULT_SETTINGS = {
   homeColor: true,
   homeMotion: true,
   homeHistory: [],
+  // 主页风格："sd" 沙金（和对话主界面一致）/ "classic" 经典
+  dashStyle: "sd",
   modules: Object.assign({}, PL_DEFAULT_MODULES)
 };
 var PL_EMO = {
@@ -1135,6 +1137,34 @@ var PlHome = class {
   }
 };
 
+// 主页底部的竖线网屏山景：太阳、三层山脊、一行飞鸟；静态绘制，尺寸或明暗变化时重画
+function plSdDrawGround(cv, colorOn) {
+  var r = cv.getBoundingClientRect(); if (!r.width || !r.height) return;
+  var dpr = Math.min(2, window.devicePixelRatio || 1); cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
+  var c = cv.getContext("2d"), pal = plhPalette(colorOn), W = r.width, H = r.height, pw = 5, cols = Math.ceil(W / pw), seed = new Date().getDate() * 7;
+  var ink = function(a) { return "rgba(" + pal.ink.join(",") + "," + a + ")"; };
+  c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, W, H);
+  var sx = W * 0.72, sy = H * 0.42, sr = H * 0.2;
+  for (var ci = 0; ci < cols; ci++) {
+    var x = ci * pw + pw / 2;
+    c.fillStyle = ink(0.1); c.fillRect(x - 0.5, 0, 1, H);
+    var dx = x - sx, half = sr * sr - dx * dx;
+    if (half > 0) { var hh = Math.sqrt(half), w = 1 + 2.5 * (1 - Math.abs(dx) / sr); c.fillStyle = ink(1); c.fillRect(x - w / 2, sy - hh, w, hh * 2); }
+    for (var k = 0; k < 3; k++) {
+      var base = H * (0.62 + k * 0.16), amp = H * (0.28 - k * 0.06), ridge = base - amp * (0.35 + 0.65 * plhNoise(ci * (0.02 + k * 0.012) + k * 9 + seed, k));
+      var w2 = k === 0 ? 1.5 : k === 1 ? 2.5 : 3.6;
+      c.fillStyle = ink(k === 0 ? 0.9 : 1); c.fillRect(x - w2 / 2, ridge, w2, H - ridge);
+      if (k === 2 && plhHash(ci, 5 + seed) < 0.18) { var L = 8 + plhHash(ci, 9) * 40; c.fillRect(x - 0.5, ridge - L, 1, L); }
+      c.fillStyle = ink(1); c.fillRect(x - (w2 + 1) / 2, ridge, w2 + 1, 3);
+    }
+  }
+  c.fillStyle = ink(1);
+  for (var b = 0; b < 6; b++) {
+    var bx = W * 0.08 + b * 22, by = H * 0.18 + Math.abs(b - 3) * 8;
+    for (var q = -6; q <= 6; q += 2) c.fillRect(bx + q, by - Math.abs(q) * 0.5, 1.6, 2 + Math.abs(q) * 0.3);
+  }
+}
+
 var ProjectLifeDashboard = class extends import_obsidian.Plugin {
   async onload() {
     await this.loadSettings();
@@ -1200,6 +1230,8 @@ var DashboardView = class extends import_obsidian.ItemView {
     root.empty();
     root.addClass("pl-dash");
     this.containerEl.addClass("pl-host");
+    this.plApplySkin();
+    this.registerEvent(this.app.workspace.on("css-change", () => this.plSdRedraw()));
     this.renderHeader(root);
     this.plContentEl = root.createDiv({ cls: "pl-content" });
     this.renderAssistant();
@@ -1228,6 +1260,7 @@ var DashboardView = class extends import_obsidian.ItemView {
     if (this.plFabEl) this.plFabEl.remove();
     if (this.plPanelEl) this.plPanelEl.remove();
     if (this.plHome) { this.plHome.destroy(); this.plHome = null; }
+    if (this.plSdRO) { this.plSdRO.disconnect(); this.plSdRO = null; }
   }
   scheduleRefresh() {
     window.clearTimeout(this.plRefreshTimer);
@@ -1393,6 +1426,7 @@ var DashboardView = class extends import_obsidian.ItemView {
     if (M.projects) this.renderProjects(el, d);
     if (M.inbox) this.renderInbox(el, d);
     if (M.calendar) this.renderCalendar(el, d);
+    if (this.plSd()) this.renderSdGround(el);
     el.createDiv({ cls: "pl-end" });
   }
   // 两列：每列的卡片上下排，最后一张拉长，两列底边对齐；只有一边有内容时平分成两列
@@ -1760,6 +1794,7 @@ var DashboardView = class extends import_obsidian.ItemView {
       blk.style.width = `${Math.max(((Math.min(b, to) - a) / span) * 100, 1)}%`;
       blk.setAttr("aria-label", `${t.time}${t.endTime ? "-" + t.endTime : ""} ${t.title}`);
     });
+    tl.style.setProperty("--now", `${Math.max(0, Math.min(100, ((nowMin - from) / span) * 100))}%`);
     if (nowMin >= from && nowMin <= to) tl.createDiv({ cls: "pl-tl-now" }).style.left = `${((nowMin - from) / span) * 100}%`;
     const lab = box.createDiv({ cls: "pl-tl-lab" });
     lab.createSpan({ text: plPad(Math.floor(from / 60)) + ":00" });
@@ -1836,7 +1871,8 @@ var DashboardView = class extends import_obsidian.ItemView {
       lab.createSpan({ cls: "pl-hb-n", text: h.name });
       const streak = plStreak(h.dates, d.today);
       if (streak > 1) lab.createEl("small", { text: `连续 ${streak} 天` });
-      lab.addEventListener("click", (e) => { e.stopPropagation(); this.plShowSwatches(lab, h.name, color); });
+      if (this.plSd()) lab.setAttr("aria-label", h.name);
+      else lab.addEventListener("click", (e) => { e.stopPropagation(); this.plShowSwatches(lab, h.name, color); });
       d.weekDates.forEach((date) => {
         const on = h.dates.includes(date), future = date > d.today;
         const sq = tr.createEl("td").createEl("button", { cls: "pl-sq" + (on ? " is-on" : "") + (date === d.today ? " is-today" : ""), attr: { "aria-label": `${h.name} ${date}${on ? " 已打卡" : ""}` } });
@@ -1901,6 +1937,17 @@ var DashboardView = class extends import_obsidian.ItemView {
     const a = plParseYmd(d.weekDates[0]), b = plParseYmd(d.weekDates[6]);
     const range = `${a.getMonth() + 1}月${a.getDate()}日至${b.getMonth() === a.getMonth() ? "" : b.getMonth() + 1 + "月"}${b.getDate()}日`;
     const { tile } = this.plTile(col, "week", "本周", `第 ${d.week.week} 周 · ${range}`, "pl-week");
+    if (this.plSd()) {
+      const counts = d.weekDates.map((date) => d.tasks.filter((t) => t.done && t.doneDate === date).length), top = Math.max(4, ...counts);
+      const wk = tile.createDiv({ cls: "pl-wk", attr: { "aria-label": "本周每天完成的件数" } });
+      d.weekDates.forEach((date, i) => {
+        const c = wk.createDiv({ cls: date === d.today ? "is-today" : "" });
+        c.createSpan({ cls: "pl-wk-n", text: counts[i] ? String(counts[i]) : "" });
+        c.createDiv({ cls: "pl-wk-bar" + (counts[i] ? "" : " is-zero") }).style.height = (counts[i] ? Math.max(8, Math.round(84 * counts[i] / top)) : 4) + "px";
+        c.createSpan({ cls: "pl-wk-d", text: String(plParseYmd(date).getDate()) });
+        c.createSpan({ cls: "pl-wk-w", text: "一二三四五六日"[i] });
+      });
+    }
     const nums = tile.createDiv({ cls: "pl-nums" });
     const num = (v, label) => { const x = nums.createDiv({ cls: "pl-num" }); x.createEl("b", { text: String(v) }); x.createSpan({ text: label }); };
     num(d.weekDone, "完成");
@@ -2152,7 +2199,30 @@ var DashboardView = class extends import_obsidian.ItemView {
   }
 
   // ───────── 新主界面（字符场景 + AI 对话）─────────
+  // 主页风格：沙金（.pl-sd，和对话主界面一致）或经典；沙金时配色跟「彩色」开关走，明暗跟 Obsidian 主题
+  plSd() { return this.plugin.settings.dashStyle !== "classic"; }
+  plApplySkin() {
+    const sd = this.plSd();
+    this.containerEl.toggleClass("pl-sd", sd);
+    this.containerEl.toggleClass("pl-sd-mono", sd && this.plugin.settings.homeColor === false);
+    if (sd) plhLoadFonts(this.plugin).then(() => this.plSdRedraw());
+  }
+  plSdRedraw() {
+    const on = this.plugin.settings.homeColor !== false;
+    this.containerEl.querySelectorAll("canvas.pl-sd-cv").forEach((cv) => plSdDrawGround(cv, on));
+  }
+  renderSdGround(el) {
+    const g = el.createDiv({ cls: "pl-sd-ground", attr: { "aria-hidden": "true" } });
+    const cv = g.createEl("canvas", { cls: "pl-sd-cv" });
+    const d = this.plData;
+    g.createSpan({ text: "PROJECT LIFE · " + new Date().getFullYear() });
+    g.createSpan({ text: d ? "第 " + d.week.week + " 周" : "" });
+    if (!this.plSdRO) this.plSdRO = new ResizeObserver((es) => es.forEach((e) => plSdDrawGround(e.target, this.plugin.settings.homeColor !== false)));
+    this.plSdRO.disconnect();
+    this.plSdRO.observe(cv);
+  }
   plHomeSync() {
+    this.plApplySkin();
     const on = this.plugin.settings.homeEnabled !== false;
     if (!on && this.plHome) { this.plHome.destroy(); this.plHome = null; }
     if (on && !this.plHome) { this.plHome = new PlHome(this); if (this.plData) this.plHome.setData(this.plData); }
@@ -2492,6 +2562,7 @@ var ProjectLifeDashboardSettingTab = class extends import_obsidian.PluginSetting
     new import_obsidian.Setting(containerEl).setName("彩色").setDesc("沙金双色：夜晚是深底沙金线，白天反过来；关掉就是黑白。白天 / 夜晚跟随 Obsidian 的明暗主题").addToggle((t) => t.setValue(s.homeColor !== false).onChange(async (v) => { s.homeColor = v; await this.plugin.saveSettings(); }));
     new import_obsidian.Setting(containerEl).setName("动效").setDesc("关掉后画面静止。系统开了「减少动态效果」时也会静止").addToggle((t) => t.setValue(s.homeMotion !== false).onChange(async (v) => { s.homeMotion = v; await this.plugin.saveSettings(); }));
     new import_obsidian.Setting(containerEl).setName("对话记录").setDesc(`保存最近 30 次问答，在对话主界面左上角「历史」里查看。现有 ${(s.homeHistory || []).length} 条`).addButton((b) => b.setButtonText("清空").onClick(async () => { s.homeHistory = []; await this.plugin.saveData(s); this.display(); }));
+    new import_obsidian.Setting(containerEl).setName("主页风格").setDesc("沙金：点「进入项目人生主页」后看到的主页也用和对话主界面同一套风格；经典：原来的白色卡片样式").addDropdown((dd) => dd.addOptions({ sd: "沙金", classic: "经典" }).setValue(s.dashStyle === "classic" ? "classic" : "sd").onChange(async (v) => { s.dashStyle = v; await this.plugin.saveSettings(); }));
     containerEl.createEl("h3", { text: "显示哪些模块" });
     PL_MODULES.forEach(([key, name, desc]) => {
       new import_obsidian.Setting(containerEl).setName(name).setDesc(desc).addToggle((t) => t.setValue(!!s.modules[key]).onChange(async (v) => { s.modules[key] = v; await this.plugin.saveSettings(); }));
