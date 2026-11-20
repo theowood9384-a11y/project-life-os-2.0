@@ -752,9 +752,9 @@
 .pl-host.pl-sd .pl-end { height: 60px; }
 
 /* AI 悬浮球 + 对话面板 */
-.pl-host.pl-sd .pl-fab, .pl-host.pl-sd .pl-fab:hover { width: 64px; height: 64px; background: var(--pl-card); color: var(--pl-ink); border: 1px solid var(--pl-ink); box-shadow: none; }
-.pl-host.pl-sd .pl-fab:hover, .pl-host.pl-sd .pl-fab.is-open { background: var(--pl-ink); color: var(--pl-card); }
-.pl-host.pl-sd .pl-fab.has-unread::before { box-shadow: 0 0 0 2px var(--pl-bg); }
+/* AI 悬浮球保持原来的样子：用经典配色（实心圆 + 阴影），不跟沙金走 */
+.pl-host.pl-sd .pl-fab { --pl-ink: #18181b; --pl-card: #ffffff; --pl-accent: #e8461f; --pl-lift: 0 18px 40px -12px rgba(0, 0, 0, 0.35); }
+.theme-dark .pl-host.pl-sd .pl-fab { --pl-ink: #f2f2f3; --pl-card: #1a1a1d; --pl-accent: #ff6a45; --pl-lift: 0 18px 40px -12px rgba(0, 0, 0, 0.75); }
 .pl-host.pl-sd .pl-panel { border: 1px solid var(--pl-ink); border-radius: 0; }
 .pl-host.pl-sd .pl-panel-head { border-bottom: 4px double var(--pl-ink); }
 .pl-host.pl-sd .pl-panel-name { font-family: var(--sd-roman); font-weight: 400; font-size: 18px; letter-spacing: .06em; }
