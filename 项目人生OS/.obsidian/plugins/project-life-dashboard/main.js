@@ -184,6 +184,12 @@ var DEFAULT_SETTINGS = {
   fabPos: { side: "right", bottom: 28 },
   habitColors: {},
   welcomeDismissed: false,
+  // 新主界面：字符场景 + AI 对话（v3.2）
+  homeEnabled: true,
+  homeScene: "globe",
+  homeColor: true,
+  homeMotion: true,
+  homeHistory: [],
   modules: Object.assign({}, PL_DEFAULT_MODULES)
 };
 var PL_EMO = {
@@ -461,6 +467,594 @@ var PlAI = class {
   }
 };
 
+// ═══════════ 新主界面：字符场景 + AI 对话（地球 / 痕迹 / 一年）═══════════
+// 盖在原主页上面的一层；点「进入主页」用方块转场切到原主页，原主页左上角「回到对话」切回来。
+// 对话和右下角悬浮球共用同一个会话（this.view.plChat / plugin.ai），所以一句话记录、SEARCHING 状态都一样。
+var PLH_SCENES = [["globe", "地球"], ["face", "痕迹"], ["land", "一年"]];
+var PLH_RAMP = " .'`^\",:;Il!i~+_-?][}{1)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
+var PLH_GLITCH = "!<>-_\\/[]{}=+*^?#%01ABCDEFGHJKLMNPQRSTUVWXYZ";
+var PLH_CJK = "项目人生此刻在想什么今天节奏痕迹地球周复盘闪念任务";
+var PLH_MONO = 'ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace';
+var PLH_SUGS = [
+  ["今天先做什么", "今天该先做什么？结合逾期、今日任务和项目进展，给我最多 3 条建议，并说明理由。"],
+  ["整理闪念", "看看我还没整理的闪念，归类后建议哪些值得转成任务、哪些值得写成笔记。先给建议，不要改文件。"],
+  ["起草周复盘", "用 week 命令取近 7 天的数据，起草本周复盘：里程碑、做得好、待改进、下周聚焦各 1–3 条。先给我看，等我确认后再用 review 命令写入。"]
+];
+// 陆地位图：192×96 等距圆柱投影，1 = 陆地（由 global-land-mask 的全球陆地数据缩小而来）
+var PLH_LAND_B64 = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAF8AAAAAAAAAAAAAAAAAAAAAAAAAAf/T///3AAAAAAgAAAAAAAAAAAAAAAAADl4f///wAAtwAAAAAOAAAAAAAAAAAAAlEXD////YAANgAAAAAAAAAAAAAAAAAARU1BAD///gAAAAAAOAAL/gAcAAAAAAAA0AWAAA///gAAAAABgAD/9AAgAAAAAAAB308/wA//+AAAAAADAZv///4HwAAAD+AAD/OP+AP/6AAAB8AAQ////////gAgf///+MDsHAH/4AAAH/xH/a/////////+J//////8H4f/AAAAf/c//n/////////Eb//////s/gPwA8AA+fr///////////+AP/////+EBAHwAAAD9//////////////AP7////8A+ADgAAAH5///////////+HwADwD///4A+QAAAAAG8//////////8EcAABgAf///Af4AAAAGBZf/////////wA4AAEAAf///4f8AAAAGBh//////////gByAAAAAf///8//AAAAbH///////////4BgAAAAAD///+//AAAABP///////////6BABAAAAC/////JAAAAA////////////6AAAAAAAA/////jwAAAD////////////wAAAAAAAA/////wAAAAB//8v////////gAAAAAAAA////+AAAAAB9v4H////////CAAAAAAAA////8AAAAAfwz4D///////8AAAAAAAAA////4AAAAAfAPv///////94EAAAAAAAA////wAAAAAfAJv///////4YIAAAAAAAAf///wAAAAAEfABf//////+YYAAAAAAAAP///gAAAAAH/AAf//////8DwAAAAAAAAH//+AAAAAAf/hAf//////+EAAAAAAAAAC//+AAAAAAf/97///////+AAAAAAAAAAA/4CAAAAAA///+f3/////+AAAAAAAAAABfwCAAAAAB////fz/////8AAAAAAAAAAAvwAAAAAAD////v4O////8AAAAAAAAAAAXwAAAAAAH////n/g////6AAAAAAAAAAADwQgAAAAH////3/wf+f9AAAAAAAAAAAAD4gEAAAAH////z/gH8PyAAAAAAAAAAAAA/gAAAAAH////7/AH4P4CAAAAAAAAAAAALgAAAAAH////58AHgL8CAAAAAAAAAAAAB8AEAAAH////9wADgD8DAAAAAAAAAAAAAIAAAAAH////+AADgQcAgAAAAAAAAAAAAMP4AAAD/////4ABgAYEAAAAAAAAAAAAAG/8AAAB/////4ABACAAgAAAAAAAAAAAAAf+AAAA/////wAAQBAIgAAAAAAAAAAAAAf/wAAAQF///wAAAEgYAAAAAAAAAAAAAAf/4AAAAB///gAAACg4AAAAAAAAAAAAAB//4AAAAB//+AAAABj6oAAAAAAAAAAABB//+AAAAB//8AAAAAj5DgAAAAAAAAAAAB///4AAAB//4AAAAA10DcAAAAAAAAAAAB///8AAAA//4AAAAAQAAfEAAAAAAAAAAB///+AAAAf/4AAAAAMAAPgAAAAAAAAAAA///+AAAAf/4AAAAAAbAGoAAAAAAAAAAA///+AAAAf/8AAAAAAAAAAAAAAAAAAAAAf//8AAAAf/8AAAAAAABAAAAAAAAAAAAAf//4AAAAf/8IAAAAAAHiAAAAAAAAAAAAP//4AAAA//44AAAAAA/nAAAAAAAAAAAAD//4AAAA//xwAAAAAB//AAAAAAAAAAAAB//4AAAAf/gwAAAAAD//gAAAAAAAAAAAB//wAAAAf/hwAAAAAP//wCAAAAAAAAAAD//AAAAAP/hgAAAAAf//wAAAAAAAAAAAD/8AAAAAP/AgAAAAAf//8AAAAAAAAAAAD/8AAAAAP/AAAAAAAf//8AAAAAAAAAAAD/8AAAAAH+AAAAAAAf//8AAAAAAAAAAAD/4AAAAAH8AAAAAAAf//8AAAAAAAAAAAD/wAAAAAD4AAAAAAAPg/4AAAAAAAAAAAD+gAAAAACAAAAAAAAIAfwAAAAAAAAAAAH/AAAAAAAAAAAAAAAAAHwAAAAAAAAAAAH+AAAAAAAAAAAAAAAAACgAGAAAAAAAAAH4AAAAAAAAAAAAAAAAAAAAEAAAAAAAAAPgAAAAAAAAAAAAAAAAABgAYAAAAAAAAAHgAAAAAAAAAAAAAAAAAAAAwAAAAAAAAAHAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAPgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAHAAAL5gXwAAAAAAAAAAAAAgAAAAAAAAD//g//////IAAAAAAAAAAAA4AAAAAAID///n///////wAAAAAAABwAK8AAAA////////////////gAAAABQA///4AAAD///////////////8AAAAf//////gAAD////////////////4AAA///////4AAA/////////////////8AAHD//////iAHgP////////////////gAAAP///////gAP/////////////////wAAB////////7////////////////////g/4D/////////////////////////////////////////////////////////////////////////////////////////////";
+var PLH_LW = 192, PLH_LH = 96;
+var PLH_LAND = (function() { var s = atob(PLH_LAND_B64), a = new Uint8Array(s.length); for (var i = 0; i < s.length; i++) a[i] = s.charCodeAt(i); return a; })();
+function plhLand(u, v) { var i = v * PLH_LW + u; return (PLH_LAND[i >> 3] >> (7 - (i & 7))) & 1; }
+function plhHash(x, y) { var h = (Math.imul(x | 0, 374761393) + Math.imul(y | 0, 668265263)) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); h ^= h >>> 16; return (h >>> 0) / 4294967296; }
+function plhNoise(x, y) { var xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi, u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf), a = plhHash(xi, yi), b = plhHash(xi + 1, yi), c = plhHash(xi, yi + 1), d = plhHash(xi + 1, yi + 1); return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v; }
+function plhClamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+function plhSmooth(a, b, x) { var t = plhClamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); }
+function plhHex(h) { h = String(h).trim(); return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]; }
+function plhMix(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
+function plhG(list) { return list.map(function(x) { return [x[0], plhHex(x[1])]; }); }
+function plhGrad(st, t) { t = plhClamp(t, 0, 1); for (var i = 0; i < st.length - 1; i++) if (t <= st[i + 1][0]) return plhMix(st[i][1], st[i + 1][1], (t - st[i][0]) / (st[i + 1][0] - st[i][0])); return st[st.length - 1][1]; }
+function plhCss(c, a) { return "rgba(" + (c[0] | 0) + "," + (c[1] | 0) + "," + (c[2] | 0) + "," + (a == null ? 1 : a) + ")"; }
+var PLH_RGBA = new Map();
+function plhRgba(c, a) {
+  var r = plhClamp(c[0] | 0, 0, 255), g = plhClamp(c[1] | 0, 0, 255), b = plhClamp(c[2] | 0, 0, 255), key = ((r >> 2) * 4096 + (g >> 2) * 64 + (b >> 2)) * 13 + a, v = PLH_RGBA.get(key);
+  if (!v) { v = "rgba(" + (r & ~3) + "," + (g & ~3) + "," + (b & ~3) + "," + (a / 12).toFixed(3) + ")"; PLH_RGBA.set(key, v); }
+  return v;
+}
+function plhRnd(s) { return s[(Math.random() * s.length) | 0]; }
+function plhScramble(n) { var o = ""; for (var i = 0; i < n; i++) o += Math.random() < 0.3 ? plhRnd(PLH_CJK) : plhRnd(PLH_GLITCH); return o; }
+function plhPad(n) { return String(n).padStart(2, "0"); }
+var PLH_PAL = {
+  globe: { n: { landD: plhHex("#F2B25C"), landN: plhHex("#3B4FA0"), ocean: plhHex("#2E6BFF"), lights: plhHex("#FFD36E"), rim: plhHex("#63B3FF"), city: plhHex("#FF6B6B") },
+           d: { landD: plhHex("#C8641E"), landN: plhHex("#2B3A78"), ocean: plhHex("#2F5BD8"), lights: plhHex("#C98A00"), rim: plhHex("#1C7ED6"), city: plhHex("#E03131") } },
+  face: { n: plhG([[0, "#2A1263"], [0.3, "#6A1B9A"], [0.55, "#D6336C"], [0.75, "#F76707"], [0.9, "#FFD43B"], [1, "#FFF3BF"]]), nScan: plhHex("#2EF2A0"),
+          d: plhG([[0, "#3B5BDB"], [0.35, "#862E9C"], [0.6, "#C2255C"], [0.8, "#E8590C"], [1, "#B35C00"]]), dScan: plhHex("#0B9E6E") },
+  land: { n: plhG([[0, "#4263EB"], [0.3, "#15AABF"], [0.55, "#51CF66"], [0.75, "#FCC419"], [1, "#FF6B6B"]]),
+          d: plhG([[0, "#1E3A8A"], [0.3, "#0B7A75"], [0.55, "#4D8C12"], [0.78, "#C77700"], [1, "#D6336C"]]) },
+  blocks: { n: ["#5c7cfa", "#9775fa", "#38d9a9", "#ffa94d"], d: ["#3b5bdb", "#7048e8", "#0ca678", "#e8590c"] }
+};
+// 所在城市：按电脑时区粗略判断，查不到就用上海
+var PLH_CITIES = { "Asia/Shanghai": [31.23, 121.47, "上海"], "Asia/Chongqing": [29.56, 106.55, "重庆"], "Asia/Urumqi": [43.83, 87.62, "乌鲁木齐"], "Asia/Hong_Kong": [22.3, 114.17, "香港"], "Asia/Macau": [22.2, 113.55, "澳门"], "Asia/Taipei": [25.03, 121.56, "台北"], "Asia/Tokyo": [35.68, 139.69, "东京"], "Asia/Seoul": [37.57, 126.98, "首尔"], "Asia/Singapore": [1.35, 103.82, "新加坡"], "Asia/Kuala_Lumpur": [3.14, 101.69, "吉隆坡"], "Asia/Bangkok": [13.76, 100.5, "曼谷"], "Asia/Dubai": [25.2, 55.27, "迪拜"], "Europe/London": [51.5, -0.12, "伦敦"], "Europe/Paris": [48.86, 2.35, "巴黎"], "Europe/Berlin": [52.52, 13.4, "柏林"], "Europe/Amsterdam": [52.37, 4.9, "阿姆斯特丹"], "America/New_York": [40.71, -74.0, "纽约"], "America/Toronto": [43.65, -79.38, "多伦多"], "America/Chicago": [41.88, -87.63, "芝加哥"], "America/Los_Angeles": [34.05, -118.24, "洛杉矶"], "America/Vancouver": [49.28, -123.12, "温哥华"], "Australia/Sydney": [-33.87, 151.21, "悉尼"], "Australia/Melbourne": [-37.81, 144.96, "墨尔本"], "Pacific/Auckland": [-36.85, 174.76, "奥克兰"] };
+function plhCity() { var tz = ""; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {} return PLH_CITIES[tz] || PLH_CITIES["Asia/Shanghai"]; }
+function plhSun(d) {
+  var doy = (d.getTime() - Date.UTC(d.getUTCFullYear(), 0, 0)) / 864e5;
+  return { dec: 23.44 * Math.sin(2 * Math.PI * (284 + doy) / 365) * Math.PI / 180, lon: (12 - d.getUTCHours() - d.getUTCMinutes() / 60) * 15 * Math.PI / 180 };
+}
+function plhLabel(ctx, E, x, y, lines, align) {
+  ctx.font = "10px " + PLH_MONO; ctx.textBaseline = "alphabetic"; ctx.textAlign = align || "left";
+  lines.forEach(function(s, i) { ctx.fillStyle = "rgba(" + E.ink + "," + (i ? 0.55 : 0.95) + ")"; ctx.fillText(s, x, y + i * 13); });
+  ctx.textAlign = "left";
+}
+
+// —— 01 地球：自转、真实昼夜分界、你所在的城市和太阳直射点 ——
+var PLH_GLOBE = {
+  init: function(E) { E.city = plhCity(); E.spin = E.city[1] * Math.PI / 180 - 0.12; E.tilt = 0.36; },
+  resize: function(E) { E.g = E.narrow ? { x: E.W * 0.5, y: E.H * 0.3, R: Math.min(E.W * 0.36, E.H * 0.18) } : { x: E.W * 0.69, y: E.H * 0.5, R: Math.min(E.H * 0.36, E.W * 0.25) }; },
+  fill: function(E, t, dt) {
+    E.spin -= dt * (0.05 + E.think * 0.6);
+    var g = E.g, cx = g.x, cy = g.y, R = g.R, sun = plhSun(new Date()), sd = Math.sin(sun.dec), cd = Math.cos(sun.dec);
+    var ct = Math.cos(E.tilt), st = Math.sin(E.tilt), cw = E.cw, ch = E.ch, cols = E.cols, F = E.field, TAU = Math.PI * 2;
+    var x0 = Math.max(0, Math.floor((cx - R * 1.2) / cw)), x1 = Math.min(cols - 1, Math.ceil((cx + R * 1.2) / cw));
+    var y0 = Math.max(0, Math.floor((cy - R * 1.2) / ch)), y1 = Math.min(E.rows - 1, Math.ceil((cy + R * 1.2) / ch));
+    for (var y = y0; y <= y1; y++) for (var x = x0; x <= x1; x++) {
+      var nx = ((x + 0.5) * cw - cx) / R, ny = ((y + 0.5) * ch - cy) / R, r2 = nx * nx + ny * ny, i = y * cols + x;
+      if (r2 > 1) { if (r2 < 1.16 && plhHash(x, y + ((t * 3) | 0)) > 0.55) { F[i] = 0.1 * (1 - (r2 - 1) / 0.16); E.tag[i] = 4; } continue; }
+      var Y = -ny, Z = Math.sqrt(1 - r2), Yp = Y * ct - Z * st, Zp = Y * st + Z * ct;
+      var lat = Math.asin(plhClamp(Yp, -1, 1)), lon = Math.atan2(nx, Zp) + E.spin;
+      var u = ((((lon / TAU + 0.5) % 1) + 1) % 1) * PLH_LW | 0, v = plhClamp(((0.5 - lat / Math.PI) * PLH_LH) | 0, 0, PLH_LH - 1);
+      var cz = Math.sin(lat) * sd + Math.cos(lat) * cd * Math.cos(lon - sun.lon), day = plhSmooth(-0.12, 0.3, cz);
+      var lum, tg = 2;
+      if (plhLand(u, v)) { tg = 1; lum = 0.44 + 0.54 * day + 0.08 * (plhHash(u, v) - 0.5); if (day < 0.25 && plhHash(u * 3, v * 7) > 0.9) { lum = Math.max(lum, 0.85); tg = 3; } }
+      else {
+        var la = lat * 57.3, lo = ((lon * 57.3) % 360 + 360) % 360, gl = ((la % 30) + 30) % 30, go = lo % 30;
+        lum = (gl < 0.8 || gl > 29.2 || go < 0.8 || go > 29.2) ? 0.06 + 0.08 * day : (plhHash(x, y) > 0.82 ? 0.07 * day : 0);
+      }
+      var rim = plhSmooth(0.84, 1, r2) * 0.32; lum += rim; if (rim > 0.14 && tg !== 3) tg = 4;
+      F[i] = lum; E.tag[i] = tg; E.aux[i] = day;
+    }
+  },
+  color: function(E, lum, tag, aux) { var P = E.night ? PLH_PAL.globe.n : PLH_PAL.globe.d; return tag === 1 ? plhMix(P.landN, P.landD, aux) : tag === 2 ? P.ocean : tag === 3 ? P.lights : P.rim; },
+  project: function(E, latD, lonR) {
+    var lat = latD * Math.PI / 180, a = lonR - E.spin, X = Math.cos(lat) * Math.sin(a), Yp = Math.sin(lat), Zp = Math.cos(lat) * Math.cos(a);
+    var ct = Math.cos(E.tilt), st = Math.sin(E.tilt), Y = Yp * ct + Zp * st, Z = -Yp * st + Zp * ct;
+    return { x: E.g.x + X * E.g.R, y: E.g.y - Y * E.g.R, vis: Z > 0.12 };
+  },
+  overlay: function(E, ctx) {
+    var d = new Date(), sun = plhSun(d), pins = [], P = E.night ? PLH_PAL.globe.n : PLH_PAL.globe.d;
+    var p1 = this.project(E, E.city[0], E.city[1] * Math.PI / 180);
+    if (p1.vis) pins.push([p1, [E.city[2] + " · 你在这里", plhPad(d.getHours()) + ":" + plhPad(d.getMinutes()) + (E.night ? " · 夜" : " · 昼")], 1, P.city]);
+    var p2 = this.project(E, sun.dec * 180 / Math.PI, sun.lon);
+    if (p2.vis) pins.push([p2, ["太阳直射点", (sun.dec < 0 ? "南纬 " : "北纬 ") + Math.abs(sun.dec * 180 / Math.PI).toFixed(1) + "°"], -1, P.lights]);
+    pins.forEach(function(p) {
+      var q = p[0], dir = p[2], lx = q.x + dir * 46, ly = q.y - 34;
+      ctx.fillStyle = E.color ? plhCss(p[3]) : "rgb(" + E.ink + ")"; ctx.fillRect(q.x - 3, q.y - 3, 6, 6);
+      ctx.strokeStyle = "rgba(" + E.ink + ",.7)"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(q.x, q.y); ctx.lineTo(lx, ly); ctx.lineTo(lx + dir * 70, ly); ctx.stroke();
+      plhLabel(ctx, E, lx + dir * 4, ly - 18, p[1], dir > 0 ? "left" : "right");
+    });
+  }
+};
+
+// —— 02 痕迹：实时计算的立体胸像 + 扫描框，框旁是今日头号要事 ——
+var PLH_FACE = {
+  resize: function(E) {
+    E.S0 = E.narrow ? Math.min(E.W * 0.2, E.H * 0.11) : E.H * 0.205;
+    E.bx = E.narrow ? E.W * 0.5 : E.W * 0.66; E.by = E.narrow ? E.H * 0.42 : E.H * 0.76;
+    var S = E.S0; E.frameR = { x: E.bx - 0.95 * S, y: E.by - 2.05 * S, w: 1.9 * S, h: 1.9 * S };
+  },
+  fill: function(E, t) {
+    var S = E.S0, bx = E.bx, by = E.by, yaw = Math.sin(t * 0.22) * 0.5, cyw = Math.cos(yaw), syw = Math.sin(yaw);
+    var EL = [
+      { c: [0, 1.15 * S, 0], r: [0.56 * S, 0.74 * S, 0.64 * S], head: 1 },
+      { c: [0, 0.32 * S, -0.06 * S], r: [0.27 * S, 0.5 * S, 0.27 * S] },
+      { c: [0, -0.5 * S, -0.12 * S], r: [1.4 * S, 0.66 * S, 0.58 * S], torso: 1 },
+      { c: [-0.56 * S, 1.1 * S, 0.02 * S], r: [0.09 * S, 0.17 * S, 0.1 * S] },
+      { c: [0.56 * S, 1.1 * S, 0.02 * S], r: [0.09 * S, 0.17 * S, 0.1 * S] }
+    ];
+    var Lx = -0.55, Ly = 0.5, Lz = 0.67, cw = E.cw, ch = E.ch, fr = E.frameR;
+    var x0 = Math.max(0, Math.floor((bx - 1.5 * S) / cw)), x1 = Math.min(E.cols - 1, Math.ceil((bx + 1.5 * S) / cw));
+    var y0 = Math.max(0, Math.floor((by - 2 * S) / ch)), y1 = Math.min(E.rows - 1, Math.ceil((by + 1.25 * S) / ch));
+    var scanY = fr.y + ((t * (0.12 + E.think * 0.9)) % 1) * fr.h;
+    for (var y = y0; y <= y1; y++) for (var x = x0; x <= x1; x++) {
+      var sx = (x + 0.5) * cw - bx, sy = by - (y + 0.5) * ch;
+      var ox = sx * cyw - 1000 * syw, oy = sy, oz = sx * syw + 1000 * cyw, dx = syw, dz = -cyw;
+      var best = 1e9, hit = null, hp = null;
+      for (var k = 0; k < EL.length; k++) {
+        var e = EL[k], qx = (ox - e.c[0]) / e.r[0], qy = (oy - e.c[1]) / e.r[1], qz = (oz - e.c[2]) / e.r[2], kx = dx / e.r[0], kz = dz / e.r[2];
+        var A = kx * kx + kz * kz, B = 2 * (qx * kx + qz * kz), C = qx * qx + qy * qy + qz * qz - 1, D = B * B - 4 * A * C;
+        if (D < 0) continue;
+        var tt = (-B - Math.sqrt(D)) / (2 * A); if (tt <= 0 || tt >= best) continue;
+        var px = ox + dx * tt, py = oy, pz = oz + dz * tt;
+        if (e.torso && py < -0.88 * S) continue;
+        best = tt; hit = e; hp = [px, py, pz];
+      }
+      var i = y * E.cols + x, inFrame = (x + 0.5) * cw > fr.x && (x + 0.5) * cw < fr.x + fr.w && Math.abs((y + 0.5) * ch - scanY) < ch * 0.9 && (y + 0.5) * ch > fr.y;
+      if (!hit) { if (inFrame) { E.field[i] = 0.12; E.tag[i] = 2; } continue; }
+      var nx = (hp[0] - hit.c[0]) / (hit.r[0] * hit.r[0]), ny = (hp[1] - hit.c[1]) / (hit.r[1] * hit.r[1]), nz = (hp[2] - hit.c[2]) / (hit.r[2] * hit.r[2]), nl = Math.hypot(nx, ny, nz);
+      nx /= nl; ny /= nl; nz /= nl;
+      var vx = nx * cyw + nz * syw, vz = -nx * syw + nz * cyw;
+      var lum = 0.1 + 0.85 * Math.max(0, vx * Lx + ny * Ly + vz * Lz) + 0.3 * Math.pow(Math.max(0, vx * 0.85 + vz * 0.2), 3);
+      if (hit.head) {
+        var lx = hp[0], ly = hp[1] - 1.15 * S, lz = hp[2];
+        if (lz > 0.2 * S) {
+          for (var s = -1; s <= 1; s += 2) { var ex = (lx - s * 0.21 * S) / (0.1 * S), ey = (ly - 0.06 * S) / (0.055 * S); if (ex * ex + ey * ey < 1) lum *= 0.28; if (Math.abs(lx - s * 0.21 * S) < 0.12 * S && Math.abs(ly - 0.17 * S) < 0.025 * S) lum *= 0.55; }
+          if (Math.abs(lx) < 0.05 * S && ly < 0.04 * S && ly > -0.22 * S) lum = lum * 0.75 + 0.22;
+          if (Math.abs(lx) < 0.09 * S && Math.abs(ly + 0.24 * S) < 0.03 * S) lum *= 0.5;
+          if (Math.abs(lx) < 0.15 * S && Math.abs(ly + 0.4 * S) < 0.022 * S) lum *= 0.38;
+        }
+        if (ly > 0.3 * S || (ly > 0.05 * S && lz < -0.1 * S)) lum *= 0.5 + 0.35 * plhNoise(lx * 0.09 + 3, ly * 0.02);
+      }
+      E.field[i] = inFrame ? Math.min(1, lum + 0.4) : lum; E.tag[i] = inFrame ? 2 : 1;
+    }
+    E.scanY = scanY;
+  },
+  color: function(E, lum, tag) { return tag === 2 ? (E.night ? PLH_PAL.face.nScan : PLH_PAL.face.dScan) : plhGrad(E.night ? PLH_PAL.face.n : PLH_PAL.face.d, lum); },
+  overlay: function(E, ctx) {
+    var f = E.frameR, ink = E.ink, L = 14;
+    ctx.strokeStyle = "rgba(" + ink + ",.45)"; ctx.lineWidth = 1; ctx.setLineDash([3, 4]); ctx.strokeRect(f.x + 0.5, f.y + 0.5, f.w, f.h); ctx.setLineDash([]);
+    ctx.strokeStyle = "rgb(" + ink + ")"; ctx.lineWidth = 1.5;
+    [[f.x, f.y, 1, 1], [f.x + f.w, f.y, -1, 1], [f.x, f.y + f.h, 1, -1], [f.x + f.w, f.y + f.h, -1, -1]].forEach(function(c) { ctx.beginPath(); ctx.moveTo(c[0], c[1] + c[3] * L); ctx.lineTo(c[0], c[1]); ctx.lineTo(c[0] + c[2] * L, c[1]); ctx.stroke(); });
+    ctx.strokeStyle = E.color ? plhCss(E.night ? PLH_PAL.face.nScan : PLH_PAL.face.dScan, 0.8) : "rgba(" + ink + ",.35)"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(f.x, E.scanY); ctx.lineTo(f.x + f.w, E.scanY); ctx.stroke();
+    plhLabel(ctx, E, f.x + 8, f.y + 18, [E.think > 0.5 ? "SEARCHING ···" : "SUBJECT · 你"]);
+    plhLabel(ctx, E, f.x + f.w - 8, f.y + 18, ["[×]"], "right");
+    if (!E.narrow) {
+      ctx.strokeStyle = "rgba(" + ink + ",.5)"; ctx.beginPath(); ctx.moveTo(f.x + f.w, f.y + f.h * 0.42); ctx.lineTo(f.x + f.w + 30, f.y + f.h * 0.42); ctx.stroke();
+      plhLabel(ctx, E, f.x + f.w + 38, f.y + f.h * 0.42 + 3, E.home.heroLines());
+    }
+  }
+};
+
+// —— 03 一年：今年每天做完的事堆成字符山丘（横向是周，纵深是星期几），最右边是今天 ——
+var PLH_LANDSCAPE = {
+  h: function(Y, gx, gy) {
+    var w0 = Math.floor(gx), d0 = Math.floor(gy), fx = gx - w0, fy = gy - d0;
+    var g = function(w, d) { w = plhClamp(w, 0, Y.cols - 1); d = plhClamp(d, 0, 6); return Y.h[w * 7 + d]; };
+    var a = g(w0, d0), b = g(w0 + 1, d0), c = g(w0, d0 + 1), dd = g(w0 + 1, d0 + 1);
+    return a + (b - a) * fx + (c - a) * fy + (a - b - c + dd) * fx * fy;
+  },
+  proj: function(E, Y, gx, gy, h) {
+    var mid = Y.cols / 2, sx = E.narrow ? E.W * 1.5 / Y.cols : E.W * 0.92 / Y.cols, sz = sx * 1.6, X = (gx - mid) * sx, Z = (gy - 3) * sz, Hh = h * E.H * (E.narrow ? 0.18 : 0.26);
+    var a = E.ang, Xr = X * Math.cos(a) - Z * Math.sin(a), Zr = X * Math.sin(a) + Z * Math.cos(a), p = 0.62, s = 1 / (1 + Zr * 0.0009);
+    return { x: E.W / 2 + Xr * s, y: E.H * 0.8 + Zr * Math.sin(p) * s - Hh * Math.cos(p) * s };
+  },
+  fill: function(E, t) {
+    var Y = E.home.yearGrid(); E.Y = Y;
+    E.ang = Math.sin(t * 0.07) * 0.22 - 0.05;
+    for (var gx = 0; gx <= Y.cols - 1; gx += 0.2) for (var gy = 0; gy <= 6; gy += 0.18) {
+      var h = this.h(Y, gx, gy); if (E.think > 0.02) h += 0.14 * E.think * Math.max(0, Math.sin(gx * 0.45 - t * 5));
+      var flat = h < 0.02;
+      if (flat && plhHash(gx * 5 | 0, gy * 9 | 0) > 0.35) continue;
+      var p = this.proj(E, Y, gx, gy, h);
+      E.put(p.x, p.y, flat ? 0.12 : 0.16 + 0.78 * h + 0.06 * (plhHash(gx * 10 | 0, gy * 10 | 0) - 0.5), flat ? 2 : 1, h);
+    }
+    var tw = Y.todayCol + 0.5, td = Y.todayRow + 0.5, th = this.h(Y, tw, td);
+    for (var k = 0; k < 6; k++) { var q = this.proj(E, Y, tw, td, th + k * 0.02); E.put(q.x, q.y, 1, 3, 1); }
+    E.todayP = this.proj(E, Y, tw, td, th);
+  },
+  color: function(E, lum, tag, aux) { return tag === 1 ? plhGrad(E.night ? PLH_PAL.land.n : PLH_PAL.land.d, aux * 1.15) : E.inkA; },
+  overlay: function(E, ctx) {
+    var p = E.todayP, Y = E.Y; if (!p || !Y) return;
+    ctx.strokeStyle = "rgba(" + E.ink + ",.7)"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(p.x, p.y - 4); ctx.lineTo(p.x, p.y - 70); ctx.lineTo(p.x + 12, p.y - 70); ctx.stroke();
+    ctx.fillStyle = "rgb(" + E.ink + ")"; ctx.fillRect(p.x - 3, p.y - 3, 6, 6);
+    plhLabel(ctx, E, p.x + 16, p.y - 74, ["今天 · 周" + "一二三四五六日"[Y.todayRow], "今天完成 " + Y.todayN + " 件"]);
+    if (E.narrow) return;
+    var self = this;
+    Y.months.forEach(function(col, i) {
+      var q = self.proj(E, Y, col + 0.5, 7.4, 0);
+      ctx.font = "10px " + PLH_MONO; ctx.textBaseline = "alphabetic"; ctx.fillStyle = "rgba(" + E.ink + ",.45)"; ctx.fillText((i + 1) + "月", q.x, q.y);
+    });
+  }
+};
+var PLH_SCENE_MAP = { globe: PLH_GLOBE, face: PLH_FACE, land: PLH_LANDSCAPE };
+
+// —— 字符引擎：场景把每格的亮度写进 field（tag/aux 给配色用），引擎按亮度打印字符；只在可见时以约 30fps 绘制 ——
+var PlhEngine = class {
+  constructor(home, canvas) {
+    this.home = home; this.cv = canvas; this.ctx = canvas.getContext("2d");
+    this.t = Math.random() * 50; this.think = 0; this.thinkT = 0; this.raf = 0; this.last = 0; this.dirty = true; this.visible = true; this.S = null;
+  }
+  setScene(S) { this.S = S; if (S.init) S.init(this); this.resize(); }
+  resize() {
+    var r = this.cv.getBoundingClientRect(); if (!r.width || !r.height) return;
+    this.W = r.width; this.H = r.height; this.narrow = this.W < 700; this.dpr = Math.min(2, window.devicePixelRatio || 1);
+    this.cv.width = Math.round(this.W * this.dpr); this.cv.height = Math.round(this.H * this.dpr);
+    this.cw = this.narrow ? 5 : 6; this.ch = Math.round(this.cw * 1.8);
+    this.cols = Math.ceil(this.W / this.cw); this.rows = Math.ceil(this.H / this.ch);
+    var n = this.cols * this.rows; this.field = new Float32Array(n); this.tag = new Uint8Array(n); this.aux = new Float32Array(n);
+    if (this.S && this.S.resize) this.S.resize(this);
+    this.dirty = true; this.kick();
+  }
+  running() { return !!this.S && this.home.isShown() && this.visible && !document.hidden; }
+  animating() { return this.home.motion() || Math.abs(this.thinkT - this.think) > 0.01; }
+  kick() {
+    if (this.raf || !this.running()) return;
+    var self = this;
+    var loop = function(ts) {
+      self.raf = 0;
+      if (!self.running()) return;
+      if (ts - self.last >= 32) {
+        var dt = self.last ? Math.min(0.06, (ts - self.last) / 1000) : 0.03; self.last = ts;
+        self.think += (self.thinkT - self.think) * Math.min(1, dt * 3);
+        var anim = self.animating();
+        if (anim) self.t += dt;
+        if (anim || self.dirty) { if (!self.field) self.resize(); if (self.field) self.frame(anim ? dt : 0); self.dirty = false; }
+      }
+      if (self.animating() || self.dirty) self.raf = requestAnimationFrame(loop);
+    };
+    this.raf = requestAnimationFrame(loop);
+  }
+  stop() { if (this.raf) cancelAnimationFrame(this.raf); this.raf = 0; }
+  frame(dt) {
+    this.night = document.body.classList.contains("theme-dark");
+    this.ink = this.night ? "236,236,236" : "17,17,17"; this.inkA = this.ink.split(",").map(Number);
+    this.color = this.home.settings.homeColor !== false && !!this.S.color;
+    this.field.fill(0); this.tag.fill(0); this.aux.fill(0);
+    if (this.S.fill) this.S.fill(this, this.t, dt);
+    var ctx = this.ctx, cw = this.cw, ch = this.ch, cols = this.cols, F = this.field, T = this.tag, A = this.aux, S = this.S, rl = PLH_RAMP.length - 1;
+    ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0); ctx.clearRect(0, 0, this.W, this.H);
+    ctx.font = (ch - 1) + "px " + PLH_MONO; ctx.textBaseline = "top";
+    var scr = this.think * 0.3, tick = Math.floor(this.t * 14), last = "", ink = this.ink, col = this.color;
+    for (var i = 0, n = F.length; i < n; i++) {
+      var lum = F[i]; if (lum < 0.05) continue;
+      var x = i % cols, y = (i / cols) | 0;
+      var k = Math.max(1, Math.min(rl, Math.round(Math.pow(lum, 0.85) * rl)));
+      if (scr > 0.02 && plhHash(x + tick * 31, y + tick) < scr) k = 1 + Math.floor(plhHash(y, x + tick) * rl);
+      var a = Math.round(((col ? 0.32 : 0.16) + (col ? 0.68 : 0.84) * Math.min(1, lum)) * 12);
+      var st = col ? plhRgba(S.color(this, lum, T[i], A[i]), a) : "rgba(" + ink + "," + (a / 12) + ")";
+      if (st !== last) { ctx.fillStyle = st; last = st; }
+      ctx.fillText(PLH_RAMP[k], x * cw, y * ch);
+    }
+    if (S.overlay) S.overlay(this, ctx, this.t);
+  }
+  put(px, py, lum, tag, aux) {
+    var x = (px / this.cw) | 0, y = (py / this.ch) | 0;
+    if (x < 0 || y < 0 || x >= this.cols || y >= this.rows) return;
+    var i = y * this.cols + x; if (lum > this.field[i]) { this.field[i] = lum; this.tag[i] = tag || 0; this.aux[i] = aux || 0; }
+  }
+};
+
+var PlHome = class {
+  constructor(view) {
+    this.view = view; this.plugin = view.plugin; this.app = view.app; this.host = view.containerEl;
+    this.shown = false; this.data = null; this.year = null; this.yearAt = 0; this.shownLen = 0; this.lastAssist = null; this.revealTimer = 0; this.scrTimer = 0;
+    this.reduce = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    this.build();
+    this.applySettings();
+    this.show(false);
+  }
+  get settings() { return this.plugin.settings; }
+  isShown() { return this.shown; }
+  motion() { return this.settings.homeMotion !== false && !this.reduce; }
+  sceneKey() {
+    var k = this.settings.homeScene || "globe";
+    if (k === "rotate") { var d = new Date(), doy = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 864e5); k = PLH_SCENES[doy % PLH_SCENES.length][0]; }
+    return PLH_SCENE_MAP[k] ? k : "globe";
+  }
+
+  build() {
+    var self = this, view = this.view;
+    var el = this.host.createDiv({ cls: "plh is-hidden" }); this.el = el;
+    this.cv = el.createEl("canvas", { cls: "plh-fx", attr: { "aria-hidden": "true" } });
+    this.engine = new PlhEngine(this, this.cv);
+    var ui = el.createDiv({ cls: "plh-ui" });
+    // 顶栏
+    var bar = ui.createDiv({ cls: "plh-bar" });
+    this.histBtn = bar.createEl("button", { cls: "plh-tb", text: "历史", attr: { "aria-expanded": "false" } });
+    bar.createSpan({ cls: "plh-mark", text: "[项目人生]" });
+    var right = bar.createDiv({ cls: "plh-grp" });
+    this.sceneBtns = {};
+    var sw = right.createDiv({ cls: "plh-scenes", attr: { role: "group", "aria-label": "选择场景" } });
+    PLH_SCENES.forEach(function(s) {
+      var b = sw.createEl("button", { cls: "plh-tb", text: s[1] });
+      b.addEventListener("click", async function() { self.settings.homeScene = s[0]; await self.plugin.saveData(self.settings); self.applySettings(); });
+      self.sceneBtns[s[0]] = b;
+    });
+    this.clockEl = right.createSpan({ cls: "plh-clock" });
+    this.pauseBtn = right.createEl("button", { cls: "plh-tb" });
+    this.pauseBtn.addEventListener("click", async function() { self.settings.homeMotion = !self.motion(); await self.plugin.saveData(self.settings); self.syncPause(); self.engine.dirty = true; self.engine.kick(); });
+    this.pop = ui.createDiv({ cls: "plh-pop is-hidden" });
+    this.histBtn.addEventListener("click", function() { self.togglePop(); });
+    view.registerDomEvent(el, "pointerdown", function(e) { if (!self.pop.hasClass("is-hidden") && !self.pop.contains(e.target) && !self.histBtn.contains(e.target)) self.togglePop(false); });
+    // 文字区 + 对话
+    this.textEl = ui.createDiv({ cls: "plh-text" });
+    var chat = ui.createDiv({ cls: "plh-chat" }); this.chatEl = chat;
+    var convo = chat.createDiv({ cls: "plh-convo", attr: { "aria-live": "polite" } });
+    this.qEl = convo.createEl("p", { cls: "plh-q" });
+    this.aEl = convo.createDiv({ cls: "plh-a" });
+    this.convoEl = convo;
+    var form = chat.createEl("form", { cls: "plh-form" });
+    form.createSpan({ text: ">", attr: { "aria-hidden": "true" } });
+    this.input = form.createEl("input", { cls: "plh-in", attr: { type: "text", autocomplete: "off", spellcheck: "false", "aria-label": "和项目人生 AI 对话" } });
+    this.sendBtn = form.createEl("button", { cls: "plh-send", attr: { type: "submit" } });
+    form.addEventListener("submit", function(e) { e.preventDefault(); if (view.plBusy) { self.plugin.ai.stop(); return; } var v = self.input.value.trim(); if (!v) return; self.input.value = ""; view.plSend(v); });
+    this.chipsEl = chat.createDiv({ cls: "plh-chips" });
+    // 进入原主页
+    var enter = ui.createEl("button", { cls: "plh-enter" });
+    enter.createSpan({ text: "进入主页" }); enter.appendText("↗");
+    enter.addEventListener("click", function() { self.hide(true); });
+    // 方块转场画布：盖住新界面和原主页
+    this.trans = this.host.createEl("canvas", { cls: "plh-trans is-hidden", attr: { "aria-hidden": "true" } });
+    // 尺寸、可见性、主题、时钟
+    this.ro = new ResizeObserver(function() { self.layout(); });
+    this.ro.observe(el);
+    this.io = new IntersectionObserver(function(es) { self.engine.visible = es[0].isIntersecting; self.engine.kick(); });
+    this.io.observe(el);
+    view.registerDomEvent(document, "visibilitychange", function() { self.engine.kick(); });
+    view.registerEvent(this.app.workspace.on("css-change", function() { self.engine.dirty = true; self.engine.kick(); }));
+    view.registerInterval(window.setInterval(function() { self.tickClock(); }, 20000));
+    this.tickClock();
+  }
+  layout() {
+    var root = this.host.children[1];
+    var top = root ? root.offsetTop : 0;
+    this.el.style.top = top + "px"; this.trans.style.top = top + "px";
+    this.engine.resize();
+  }
+  tickClock() { var d = new Date(); if (this.clockEl) this.clockEl.setText((d.getMonth() + 1) + "." + plhPad(d.getDate()) + " — " + plhPad(d.getHours()) + ":" + plhPad(d.getMinutes())); if (this.engine) { this.engine.dirty = true; this.engine.kick(); } }
+  syncPause() { this.pauseBtn.setText(this.motion() ? "暂停" : "继续"); this.pauseBtn.setAttr("aria-pressed", String(!this.motion())); this.pauseBtn.setAttr("aria-label", this.motion() ? "暂停动效" : "继续动效"); }
+  applySettings() {
+    var key = this.sceneKey();
+    Object.keys(this.sceneBtns).forEach((k) => this.sceneBtns[k].toggleClass("is-on", k === key));
+    this.syncPause();
+    this.renderChips();
+    if (key !== this.scene) {
+      this.scene = key; this.el.setAttr("data-scene", key);
+      this.engine.setScene(PLH_SCENE_MAP[key]);
+      this.renderText(true);
+      if (key === "land") this.loadYear(true);
+    }
+    this.engine.dirty = true; this.engine.kick();
+  }
+
+  // —— 文字区：标题 + 数字，随场景变化 ——
+  renderText(decode) {
+    var el = this.textEl, d = this.data, k = this.scene;
+    el.empty();
+    var greet = k === "face" ? "每一天，\n都留下痕迹。" : k === "land" ? "此刻，在想什么？" : "此刻，\n在想什么？";
+    if (k === "land") el.createEl("p", { cls: "plh-sub", text: this.landSub() });
+    var h = el.createEl("h2", { cls: "plh-greet" });
+    if (k === "globe") {
+      var stats = el.createDiv({ cls: "plh-stats" });
+      var od = d ? d.open.filter((t) => t.overdue).length : 0;
+      var best = d ? d.habits.reduce((m, x) => Math.max(m, plStreak(x.dates, d.today)), 0) : 0;
+      [[d ? d.open.length : 0, "今日待办"], [od, "逾期"], [best, "连续打卡"], [d ? d.week.week : plIsoWeek(plToday()).week, "周 · " + new Date().getFullYear()]].forEach(function(s) {
+        var b = stats.createDiv(); b.createEl("b", { text: plhPad(s[0]) }); b.createSpan({ text: s[1] });
+      });
+    }
+    if (k === "face" && d) el.createEl("p", { cls: "plh-sub", text: "第 " + d.week.week + " 周 · 本周完成 " + d.weekDone + " 件 · 今天完成 " + d.doneToday.length + " 件" });
+    if (decode && !this.reduce) this.decode(h, greet, 1100); else h.setText(greet);
+    this.greetEl = h;
+  }
+  landSub() { var y = new Date().getFullYear(), w = plIsoWeek(plToday()).week; return y + " · 第 " + w + " 周 · 今年完成 " + (this.year ? this.year.total : "—") + " 件"; }
+  decode(el, target, ms) {
+    var t0 = performance.now();
+    var step = function(ts) {
+      if (!el.isConnected) return;
+      var p = plhClamp((ts - t0) / ms, 0, 1), n = Math.floor(target.length * p), out = "";
+      for (var i = 0; i < target.length; i++) { var c = target[i]; out += i < n || c === "\n" || c === " " || c === "，" ? c : (Math.random() < 0.35 ? plhRnd(PLH_CJK) : plhRnd(PLH_GLITCH)); }
+      el.setText(out); if (p < 1) requestAnimationFrame(step); else el.setText(target);
+    };
+    requestAnimationFrame(step);
+  }
+  heroLines() {
+    var d = this.data;
+    if (!d) return ["今日头号要事", "读取中…"];
+    var h = d.hero || (d.undated && d.undated[0]);
+    if (!h) return ["今日头号要事", d.doneToday.length ? "今天的事都做完了" : "今天还没有安排", "在左边说一句就能记下"];
+    var lines = [d.hero ? "今日头号要事" : "还没排日期 · 可以先做", plDisplayTitle(h.title).slice(0, 26)];
+    if (h.project) { var p = d.projects.find((x) => x.name === h.project); lines.push(h.project.slice(0, 18) + (p ? " · " + p.done + " / " + p.total : "")); }
+    return lines;
+  }
+  setData(d) {
+    this.data = d;
+    if (this.scene === "land") this.loadYear(false);
+    this.renderText(false); // 只更新数字，不重放解码动画
+    this.engine.dirty = true; this.engine.kick();
+  }
+
+  // —— 一年的数据：今年每天完成的任务 + 打卡次数（任务文件、项目文件夹及其上级、今年的日记）——
+  async loadYear(force) {
+    if (this.yearLoading || (!force && Date.now() - this.yearAt < 60000)) return;
+    this.yearLoading = true;
+    try {
+      var s = this.settings, y = String(new Date().getFullYear()), counts = {};
+      var projRoot = s.projectFolder && s.projectFolder.includes("/") ? s.projectFolder.split("/").slice(0, -1).join("/") : s.projectFolder;
+      var files = this.app.vault.getMarkdownFiles().filter(function(f) {
+        if (f.path === s.taskFile) return true;
+        if (projRoot && f.path.startsWith(projRoot + "/")) return true;
+        return !!(s.dailyNotesFolder && f.path.startsWith(s.dailyNotesFolder + "/") && f.basename.startsWith(y));
+      });
+      for (var f of files) plCollectTaskLines(await this.app.vault.cachedRead(f), f.path).forEach(function(t) { if (t.done && t.doneDate && t.doneDate.startsWith(y)) counts[t.doneDate] = (counts[t.doneDate] || 0) + 1; });
+      var hf = this.app.vault.getAbstractFileByPath(s.habitsFile);
+      if (hf instanceof import_obsidian.TFile) plParseHabits(await this.app.vault.cachedRead(hf)).forEach(function(h) { h.dates.forEach(function(dt) { if (dt.startsWith(y)) counts[dt] = (counts[dt] || 0) + 1; }); });
+      var total = 0; Object.keys(counts).forEach(function(k) { total += counts[k]; });
+      this.year = { counts: counts, total: total }; this.yearGridCache = null; this.yearAt = Date.now();
+      if (this.scene === "land") { var sub = this.textEl.querySelector(".plh-sub"); if (sub) sub.setText(this.landSub()); }
+      this.engine.dirty = true; this.engine.kick();
+    } catch (e) { console.error("项目人生新主界面：读取今年数据失败", e); }
+    finally { this.yearLoading = false; }
+  }
+  yearGrid() {
+    var today = plToday();
+    if (this.yearGridCache && this.yearGridCache.day === today) return this.yearGridCache;
+    var yr = new Date().getFullYear(), jan1 = new Date(yr, 0, 1), off = (jan1.getDay() + 6) % 7, days = (new Date(yr, 11, 31) - jan1) / 864e5 + 1;
+    var cols = Math.ceil((days + off) / 7), h = new Float32Array(cols * 7), counts = this.year ? this.year.counts : {}, vals = [];
+    Object.keys(counts).forEach(function(k) { vals.push(counts[k]); }); vals.sort(function(a, b) { return a - b; });
+    var top = Math.max(4, vals.length ? vals[Math.floor(vals.length * 0.9)] : 0);
+    var todayIdx = Math.round((plParseYmd(today) - jan1) / 864e5), months = [];
+    for (var m = 0; m < 12; m++) months.push(Math.floor((Math.round((new Date(yr, m, 1) - jan1) / 864e5) + off) / 7));
+    for (var i = 0; i < days; i++) {
+      var dt = new Date(yr, 0, 1 + i), key = plYmd(dt), c = Math.floor((i + off) / 7), r = (dt.getDay() + 6) % 7;
+      h[c * 7 + r] = i > todayIdx ? 0 : Math.min(1, 0.05 + 0.03 * plhNoise(c * 0.5, r) + 0.92 * Math.min(1, (counts[key] || 0) / top));
+    }
+    this.yearGridCache = { day: today, cols: cols, h: h, todayCol: Math.floor((todayIdx + off) / 7), todayRow: (plParseYmd(today).getDay() + 6) % 7, todayN: counts[today] || 0, months: months };
+    return this.yearGridCache;
+  }
+
+  // —— 对话：显示最近一问一答；AI 思考时 SEARCHING，回答一段段解码出来 ——
+  renderChips() {
+    var self = this, view = this.view, st = this.plugin.ai.status(), box = this.chipsEl;
+    box.empty();
+    this.input.setAttr("placeholder", st.ok ? "问点什么，或者记一句" : "「闪念：…」「任务：…」「跑步打卡」");
+    if (st.ok) PLH_SUGS.forEach(function(s) { var b = box.createEl("button", { text: s[0], attr: { type: "button" } }); b.addEventListener("click", function() { view.plSend(s[1], s[0]); }); });
+    else [["记闪念", "闪念："], ["加任务", "任务："], ["打卡", "跑步打卡"]].forEach(function(s) { var b = box.createEl("button", { text: s[0], attr: { type: "button" } }); b.addEventListener("click", function() { self.input.value = s[1]; self.input.focus(); }); });
+    if (this.view.plChat.length) { var n = box.createEl("button", { cls: "plh-new", text: "新对话", attr: { type: "button" } }); n.addEventListener("click", function() { self.plugin.ai.reset(); view.plChat = []; view.plBusy = false; view.plUpdateSendBtn(); view.renderChat(); }); }
+  }
+  syncChat() {
+    var view = this.view, chat = view.plChat, busy = view.plBusy, self = this;
+    if (!this.aEl) return;
+    this.engine.thinkT = busy ? 1 : 0; this.engine.kick();
+    this.sendBtn.setText(busy ? "停止 ■" : "发送 ↵");
+    var u = -1; for (var i = chat.length - 1; i >= 0; i--) if (chat[i].role === "user") { u = i; break; }
+    window.clearInterval(this.scrTimer);
+    if (u < 0) {
+      var st = this.plugin.ai.status();
+      this.qEl.setText(""); this.aEl.empty(); this.lastAssist = null;
+      this.aEl.createSpan({ cls: "plh-hint", text: st.ok ? "说一句话，或者问点什么。回车发送。" : "说一句话就能记下：「闪念：…」「任务：…」「跑步打卡」。（" + st.reason + "，暂时不能和 AI 对话。）" });
+      this.renderChips();
+      return;
+    }
+    this.qEl.setText(chat[u].text);
+    var after = chat.slice(u + 1), msg = after.filter((m) => m.role === "assistant").pop() || after.filter((m) => m.role === "error").pop() || null, status = after.find((m) => m.role === "status");
+    if (!msg && status) {
+      this.lastAssist = null; this.aEl.empty();
+      this.aEl.createSpan({ cls: "plh-srch", text: "SEARCHING" }); this.aEl.appendText(status.text.replace(/…$/, ""));
+      var scr = this.aEl.createSpan({ cls: "plh-scr" });
+      this.scrTimer = window.setInterval(function() { scr.setText(plhScramble(6)); }, 70);
+      return;
+    }
+    if (!msg) return;
+    if (msg.role === "error") { this.lastAssist = null; this.aEl.empty(); this.aEl.createSpan({ cls: "plh-err", text: "! " + msg.text }); return; }
+    if (this.lastAssist !== msg) { this.lastAssist = msg; this.shownLen = 0; }
+    this.reveal(msg, busy);
+    if (!busy && !msg.plhSaved) { msg.plhSaved = true; this.remember(chat[u].text, msg.text); this.renderChips(); }
+  }
+  // 逐字揭开新到的文字（前面几个字先是乱码），全部揭开且对话结束后再渲染成 Markdown
+  reveal(msg, busy) {
+    var self = this;
+    window.clearTimeout(this.revealTimer);
+    var target = msg.text, plain = target.replace(/\*\*/g, "");
+    var step = function() {
+      if (self.lastAssist !== msg) return;
+      if (self.reduce) self.shownLen = plain.length;
+      if (self.shownLen < plain.length) {
+        self.shownLen = Math.min(plain.length, self.shownLen + 3);
+        self.aEl.empty(); self.aEl.removeClass("is-md"); self.aEl.setText(plain.slice(0, self.shownLen) + plhScramble(Math.min(4, plain.length - self.shownLen)));
+        self.convoEl.scrollTop = self.convoEl.scrollHeight;
+        self.revealTimer = window.setTimeout(step, 22);
+        return;
+      }
+      if (!self.view.plBusy) {
+        self.aEl.empty(); self.aEl.addClass("is-md");
+        var R = import_obsidian.MarkdownRenderer;
+        if (R.render) R.render(self.app, target, self.aEl, "", self.view); else R.renderMarkdown(target, self.aEl, "", self.view);
+      } else self.aEl.setText(plain);
+    };
+    step();
+  }
+  remember(q, a) {
+    var h = Array.isArray(this.settings.homeHistory) ? this.settings.homeHistory : [];
+    h.unshift({ q: String(q).slice(0, 200), a: String(a).slice(0, 4000), at: plNow() });
+    this.settings.homeHistory = h.slice(0, 30);
+    this.plugin.saveData(this.settings);
+  }
+  togglePop(open) {
+    var self = this, pop = this.pop, show = open === void 0 ? pop.hasClass("is-hidden") : open;
+    pop.toggleClass("is-hidden", !show); this.histBtn.setAttr("aria-expanded", String(show));
+    if (!show) return;
+    pop.empty();
+    var h = Array.isArray(this.settings.homeHistory) ? this.settings.homeHistory : [];
+    if (!h.length) { pop.createDiv({ cls: "plh-pop-empty", text: "还没有对话记录。" }); return; }
+    h.forEach(function(it) {
+      var b = pop.createEl("button", { attr: { type: "button" } });
+      b.createSpan({ text: it.q });
+      b.createEl("small", { text: String(it.at).slice(5) });
+      b.addEventListener("click", function() {
+        self.togglePop(false); window.clearTimeout(self.revealTimer); window.clearInterval(self.scrTimer); self.lastAssist = null;
+        self.qEl.setText(it.q); self.aEl.empty(); self.aEl.addClass("is-md");
+        var R = import_obsidian.MarkdownRenderer; if (R.render) R.render(self.app, it.a, self.aEl, "", self.view); else R.renderMarkdown(it.a, self.aEl, "", self.view);
+      });
+    });
+  }
+
+  // —— 显示 / 隐藏，带方块转场 ——
+  show(animate) { this.swap(true, animate); }
+  hide(animate) { this.swap(false, animate); }
+  swap(on, animate) {
+    var self = this;
+    if (this.moving) return;
+    var apply = function() {
+      self.shown = on;
+      self.el.toggleClass("is-hidden", !on);
+      self.host.toggleClass("pl-home-on", on);
+      if (on) { self.layout(); self.renderText(true); self.syncChat(); self.engine.kick(); }
+    };
+    if (!animate || this.reduce) { apply(); if (on && animate) this.input.focus(); return; }
+    this.moving = true;
+    this.blocks(true, function() { apply(); self.blocks(false, function() { self.moving = false; if (on) self.input.focus(); }); });
+  }
+  blocks(cover, done) {
+    var cv = this.trans, r = this.host.getBoundingClientRect(), root = this.host.children[1], top = root ? root.offsetTop : 0;
+    var W = r.width, H = r.height - top, dpr = Math.min(2, window.devicePixelRatio || 1);
+    cv.removeClass("is-hidden"); cv.style.top = top + "px"; cv.style.width = W + "px"; cv.style.height = H + "px"; cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    var ctx = cv.getContext("2d"), night = document.body.classList.contains("theme-dark"), ink = night ? "rgb(236,236,236)" : "rgb(17,17,17)";
+    var pal = this.settings.homeColor !== false ? PLH_PAL.blocks[night ? "n" : "d"] : null;
+    var B = 24, cols = Math.ceil(W / B), rows = Math.ceil(H / B), t0 = performance.now(), dur = 460;
+    var step = function(ts) {
+      var p = plhClamp((ts - t0) / dur, 0, 1); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H); ctx.fillStyle = ink;
+      for (var y = 0; y < rows; y++) for (var x = 0; x < cols; x++) {
+        var th = (cover ? (1 - y / rows) : (y / rows)) * 0.65 + plhHash(x, y) * 0.35, on = cover ? th < p * 1.02 : th > p * 1.02;
+        if (on) { if (pal) ctx.fillStyle = plhHash(x * 3, y * 5) < 0.3 ? ink : pal[(plhHash(x, y * 7) * 4) | 0]; ctx.fillRect(x * B + 1, y * B + 1, B - 2, B - 2); }
+      }
+      if (p < 1) requestAnimationFrame(step); else { if (!cover) cv.addClass("is-hidden"); done && done(); }
+    };
+    requestAnimationFrame(step);
+  }
+  destroy() {
+    this.engine.stop(); window.clearTimeout(this.revealTimer); window.clearInterval(this.scrTimer);
+    if (this.ro) this.ro.disconnect(); if (this.io) this.io.disconnect();
+    this.host.removeClass("pl-home-on"); this.el.remove(); this.trans.remove();
+  }
+};
+
 var ProjectLifeDashboard = class extends import_obsidian.Plugin {
   async onload() {
     await this.loadSettings();
@@ -472,6 +1066,11 @@ var ProjectLifeDashboard = class extends import_obsidian.Plugin {
       await this.activateView();
       const v = this.app.workspace.getLeavesOfType(VIEW_TYPE_DASHBOARD)[0];
       if (v && v.view && v.view.plFocusInput) v.view.plFocusInput();
+    } });
+    this.addCommand({ id: "open-home", name: "打开对话主界面（字符场景）", callback: async () => {
+      await this.activateView();
+      const v = this.app.workspace.getLeavesOfType(VIEW_TYPE_DASHBOARD)[0];
+      if (v && v.view && v.view.plShowHome) v.view.plShowHome(true);
     } });
     this.addSettingTab(new ProjectLifeDashboardSettingTab(this.app, this));
     this.app.workspace.onLayoutReady(() => { if (this.settings.openOnStartup) this.activateView(); });
@@ -500,7 +1099,7 @@ var ProjectLifeDashboard = class extends import_obsidian.Plugin {
   }
   async saveSettings() {
     await this.saveData(this.settings);
-    this.app.workspace.getLeavesOfType(VIEW_TYPE_DASHBOARD).forEach((l) => { if (l.view && l.view.refresh) { l.view.renderAssistant(); l.view.refresh(); } });
+    this.app.workspace.getLeavesOfType(VIEW_TYPE_DASHBOARD).forEach((l) => { if (l.view && l.view.refresh) { l.view.renderAssistant(); if (l.view.plHomeSync) l.view.plHomeSync(); l.view.refresh(); } });
   }
 };
 
@@ -524,6 +1123,7 @@ var DashboardView = class extends import_obsidian.ItemView {
     this.renderHeader(root);
     this.plContentEl = root.createDiv({ cls: "pl-content" });
     this.renderAssistant();
+    this.plHomeSync();
     this.registerDomEvent(this.containerEl, "keydown", (e) => { if (e.key === "Escape" && this.plPanelOpen) { if (this.plBusy) this.plugin.ai.stop(); else this.plTogglePanel(false); } });
     this.registerDomEvent(this.containerEl, "keydown", (e) => {
       if ((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && String(e.key).toLowerCase() === "k" && this.plSearchInput) { e.preventDefault(); e.stopPropagation(); this.plSearchInput.focus(); this.plSearchInput.select(); }
@@ -547,6 +1147,7 @@ var DashboardView = class extends import_obsidian.ItemView {
     window.clearTimeout(this.plRefreshTimer);
     if (this.plFabEl) this.plFabEl.remove();
     if (this.plPanelEl) this.plPanelEl.remove();
+    if (this.plHome) { this.plHome.destroy(); this.plHome = null; }
   }
   scheduleRefresh() {
     window.clearTimeout(this.plRefreshTimer);
@@ -562,6 +1163,7 @@ var DashboardView = class extends import_obsidian.ItemView {
       const scrollTop = root.scrollTop;
       const fresh = document.createElement("div");
       await this.renderDashboard(fresh);
+      if (this.plHome && this.plData) this.plHome.setData(this.plData);
       const hadFocus = this.plRefocusQuick || (document.activeElement && document.activeElement.classList && document.activeElement.classList.contains("pl-quick-input"));
       this.plRefocusQuick = false;
       this.plContentEl.empty();
@@ -786,6 +1388,8 @@ var DashboardView = class extends import_obsidian.ItemView {
     // 先刷新再滚动：刷新会恢复原来的滚动位置，顺序反了就回不到顶部
     logo.addEventListener("click", async (e) => { e.preventDefault(); await this.refresh(); root.scrollTo({ top: 0, behavior: "smooth" }); });
     this.renderSearch(row);
+    this.plHomeBtn = row.createEl("button", { cls: "pl-home-btn", text: "← 回到对话", attr: { "aria-label": "回到对话主界面" } });
+    this.plHomeBtn.addEventListener("click", () => this.plShowHome(true));
     const add = row.createEl("button", { cls: "pl-add", text: "+ 任务" });
     add.addEventListener("click", () => this.plFocusQuick());
     // 常用位置：页头下面一行，跟着页面滚走
@@ -1467,6 +2071,19 @@ var DashboardView = class extends import_obsidian.ItemView {
     input.click();
   }
 
+  // ───────── 新主界面（字符场景 + AI 对话）─────────
+  plHomeSync() {
+    const on = this.plugin.settings.homeEnabled !== false;
+    if (!on && this.plHome) { this.plHome.destroy(); this.plHome = null; }
+    if (on && !this.plHome) { this.plHome = new PlHome(this); if (this.plData) this.plHome.setData(this.plData); }
+    else if (on) this.plHome.applySettings();
+    if (this.plHomeBtn) this.plHomeBtn.toggleClass("is-hidden", !on);
+  }
+  plShowHome(animate) {
+    if (this.plugin.settings.homeEnabled === false) return;
+    if (!this.plHome) this.plHomeSync();
+    if (this.plHome && !this.plHome.isShown()) this.plHome.show(animate);
+  }
   // ───────── AI 悬浮球 + 对话面板 ─────────
   renderAssistant() {
     if (this.plFabEl) { this.plFabEl.remove(); this.plFabEl = null; }
@@ -1574,6 +2191,7 @@ var DashboardView = class extends import_obsidian.ItemView {
     if (this.plPanelOpen && this.plChatEl) this.plChatEl.scrollTop = this.plChatEl.scrollHeight;
   }
   plUpdateSendBtn() {
+    if (this.plHome) this.plHome.syncChat();
     if (this.plFabEl) this.plFabEl.toggleClass("is-busy", this.plBusy);
     if (!this.plSendBtn) return;
     this.plSendBtn.empty();
@@ -1586,6 +2204,7 @@ var DashboardView = class extends import_obsidian.ItemView {
     this.plTogglePanel(true);
   }
   renderChat() {
+    if (this.plHome) this.plHome.syncChat();
     const list = this.plChatEl;
     if (!list) return;
     list.empty();
@@ -1787,6 +2406,12 @@ var ProjectLifeDashboardSettingTab = class extends import_obsidian.PluginSetting
     new import_obsidian.Setting(containerEl).setName("启动时打开主页").setDesc("打开 Obsidian 时自动在中间打开主页，并固定为标签页").addToggle((t) => t.setValue(s.openOnStartup !== false).onChange(async (v) => { s.openOnStartup = v; await this.plugin.saveSettings(); }));
 
     new import_obsidian.Setting(containerEl).setName("欢迎栏").setDesc("重新显示首次打开时主页里的「欢迎」一栏（含「清除示例内容」）").addButton((b) => b.setButtonText("重新显示").onClick(async () => { s.welcomeDismissed = false; await this.plugin.saveSettings(); }));
+    containerEl.createEl("h3", { text: "对话主界面" });
+    new import_obsidian.Setting(containerEl).setName("启用对话主界面").setDesc("打开主页时先看到字符场景和 AI 对话，点右下角「进入主页」再看原来的主页；关掉就和以前一样直接显示主页").addToggle((t) => t.setValue(s.homeEnabled !== false).onChange(async (v) => { s.homeEnabled = v; await this.plugin.saveSettings(); }));
+    new import_obsidian.Setting(containerEl).setName("场景").setDesc("地球：此刻的地球和昼夜；痕迹：扫描框锁定今日头号要事；一年：今年每天做完的事堆成的山丘").addDropdown((dd) => dd.addOptions({ globe: "地球", face: "痕迹", land: "一年", rotate: "每天轮换" }).setValue(s.homeScene || "globe").onChange(async (v) => { s.homeScene = v; await this.plugin.saveSettings(); }));
+    new import_obsidian.Setting(containerEl).setName("彩色").setDesc("关掉就是黑白。白天 / 夜晚跟随 Obsidian 的明暗主题").addToggle((t) => t.setValue(s.homeColor !== false).onChange(async (v) => { s.homeColor = v; await this.plugin.saveSettings(); }));
+    new import_obsidian.Setting(containerEl).setName("动效").setDesc("关掉后画面静止。系统开了「减少动态效果」时也会静止").addToggle((t) => t.setValue(s.homeMotion !== false).onChange(async (v) => { s.homeMotion = v; await this.plugin.saveSettings(); }));
+    new import_obsidian.Setting(containerEl).setName("对话记录").setDesc(`保存最近 30 次问答，在对话主界面左上角「历史」里查看。现有 ${(s.homeHistory || []).length} 条`).addButton((b) => b.setButtonText("清空").onClick(async () => { s.homeHistory = []; await this.plugin.saveData(s); this.display(); }));
     containerEl.createEl("h3", { text: "显示哪些模块" });
     PL_MODULES.forEach(([key, name, desc]) => {
       new import_obsidian.Setting(containerEl).setName(name).setDesc(desc).addToggle((t) => t.setValue(!!s.modules[key]).onChange(async (v) => { s.modules[key] = v; await this.plugin.saveSettings(); }));

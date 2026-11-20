@@ -1,9 +1,9 @@
 {
   "id": "project-life-dashboard",
   "name": "项目人生系统",
-  "version": "3.1.1",
+  "version": "3.2.0",
   "minAppVersion": "1.4.0",
-  "description": "项目人生 OS 的主页：常用位置、今日头号要事、今天、项目、节奏、待整理、本周；右上角搜索，右下角 AI 悬浮球可一句话记录，或借用 Claudian 的配置与 AI 对话。",
+  "description": "项目人生 OS 的主页：打开先是字符场景（地球 / 痕迹 / 一年）和 AI 对话，点「进入主页」看常用位置、今日头号要事、今天、项目、节奏、待整理、本周；右上角搜索，右下角 AI 悬浮球可一句话记录，或借用 Claudian 的配置与 AI 对话。",
   "author": "爱分享的小师兄",
   "authorUrl": "",
   "isDesktopOnly": false
