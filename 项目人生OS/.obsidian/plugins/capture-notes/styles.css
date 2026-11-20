@@ -3612,3 +3612,105 @@
   .cnp-riso .ri-wall { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (prefers-reduced-motion: reduce) { .cnp * { transition: none !important; } }
+
+/* ═══════════ 沙金（2.4.0）：和「项目人生系统」主页的沙金风格一致 ═══════════
+   和「简洁」同一套分区结构与交互，只换皮肤：沙金 + 深咖啡两色（夜晚深底沙金字，白天反过来），双细线分段，
+   古典衬线大标题，宽体小标签；便签颜色变成一小块竖线色块。字体借用「项目人生系统」插件随附的 PLH Wide / PLH Roman。 */
+.cnb.cnb-sd {
+  --sd-paper-rgb: 168, 148, 116; --sd-ink: 44, 40, 36;
+  --sd-wide: "PLH Wide", "Michroma", "Eurostile", "Arial Black", var(--font-interface);
+  --sd-roman: "PLH Roman", "Marcellus", "Songti SC", "STSong", "Source Han Serif SC", "Noto Serif CJK SC", "Noto Serif SC", "SimSun", serif;
+  --cnb-bg: rgb(var(--sd-paper-rgb)); --cnb-card: rgb(var(--sd-paper-rgb)); --cnb-ink: rgb(var(--sd-ink)); --cnb-mute: rgba(var(--sd-ink), .74);
+  --cnb-line: rgba(var(--sd-ink), .42); --cnb-soft: rgba(var(--sd-ink), .08); --cnb-accent: rgb(var(--sd-ink)); --cnb-on-accent: rgb(var(--sd-paper-rgb));
+  --cnb-ok: rgb(var(--sd-ink)); --cnb-pattern: rgba(var(--sd-ink), .16); --cnb-shadow: none; --cnb-lift: none;
+}
+.theme-dark .cnb.cnb-sd { --sd-paper-rgb: 44, 40, 36; --sd-ink: 168, 148, 116; }
+.cn-container.cnb.cnb-sd { padding: 18px 20px 48px; }
+
+/* 顶栏 */
+.cnb.cnb-sd .cnb-top { gap: 14px; padding-bottom: 14px; border-bottom: 4px double var(--cnb-ink); }
+.cnb.cnb-sd .cnb-title { font-family: var(--sd-roman); font-weight: 400; font-size: 26px; letter-spacing: .08em; }
+.cnb.cnb-sd .cnb-title span { font-family: var(--sd-wide); font-size: 10px; letter-spacing: .16em; color: var(--cnb-mute); }
+.cnb.cnb-sd .cnb-search { padding: 0 2px; border: 0; border-bottom: 1px solid var(--cnb-ink); border-radius: 0; background: transparent; color: var(--cnb-ink); }
+.cnb.cnb-sd .cnb-seg { border-radius: 999px; border-color: var(--cnb-ink); background: transparent; }
+.cnb.cnb-sd .cnb-seg button { font-size: 11.5px; letter-spacing: .14em; color: var(--cnb-ink); }
+.cnb.cnb-sd .cnb-new, .cnb.cnb-sd .cnb-new:hover { height: 34px; padding: 0 20px; background: var(--cnb-ink); color: var(--cnb-card); font-family: var(--sd-wide); font-size: 10px; font-weight: 400; letter-spacing: .18em; }
+.cnb.cnb-sd .cnb-sub { margin: 12px 0 18px; font-size: 11.5px; letter-spacing: .14em; color: var(--cnb-ink); }
+.cnb.cnb-sd .cnb-trash.on { font-weight: 400; text-decoration: underline; text-underline-offset: 4px; }
+
+/* 分区：卡片变成细线分隔的格子 */
+.cnb.cnb-sd .cnb-bento { gap: 0 28px; grid-auto-rows: minmax(110px, auto); }
+.cnb.cnb-sd .cnb-tile { padding: 14px 0 12px; border: 0; border-top: 1px solid var(--cnb-line); border-radius: 0; background: transparent; }
+.cnb.cnb-sd .cnb-k { font-family: var(--sd-wide); font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--cnb-mute); }
+.cnb.cnb-sd .cnb-kl, .cnb.cnb-sd .cnb-when { font-family: inherit; }
+.cnb.cnb-sd .red { color: var(--cnb-ink); font-weight: 400; text-decoration: underline wavy; text-underline-offset: 3px; }
+/* 便签颜色：一小块该颜色的竖线色块，按颜色整理时仍然认得出 */
+.cnb.cnb-sd .cnb-dot { width: 16px; height: 10px; border-radius: 0; background: repeating-linear-gradient(90deg, var(--dot) 0 2px, transparent 2px 4px); }
+
+/* 今天要做 + 统计 */
+.cnb.cnb-sd .cnb-overview > .cnb-tile { border-top: 0; }
+.cnb.cnb-sd .cnb-today { padding-top: 6px; }
+.cnb.cnb-sd .cnb-big { font-family: var(--sd-roman); font-weight: 400; font-size: clamp(48px, 7cqi, 72px); letter-spacing: 0; }
+.cnb.cnb-sd .cnb-big small { font-family: var(--sd-wide); font-size: 10px; letter-spacing: .16em; color: var(--cnb-ink); }
+.cnb.cnb-sd .cnb-item { padding: 11px 0; border-top-color: var(--cnb-line); letter-spacing: .03em; }
+.cnb.cnb-sd .cnb-w { font-family: var(--sd-wide); font-size: 9.5px; letter-spacing: .1em; color: var(--cnb-ink); }
+.cnb.cnb-sd .cnb-hint, .cnb.cnb-sd .cnb-more-line { letter-spacing: .06em; }
+.cnb.cnb-sd .cnb-link { font-size: 11.5px; letter-spacing: .14em; color: var(--cnb-ink); border-bottom: 1px solid var(--cnb-line); }
+.cnb.cnb-sd .cnb-link:hover { text-decoration: none; border-bottom-color: var(--cnb-ink); }
+.cnb.cnb-sd .cnb-ck { border: 1px solid var(--cnb-ink); }
+.cnb.cnb-sd .cnb-overview > .cnb-stat { border-top: 1px solid var(--cnb-line); }
+.cnb.cnb-sd .cnb-stat:hover { background: transparent; border-color: var(--cnb-ink); }
+.cnb.cnb-sd .cnb-stat b { font-family: var(--sd-roman); font-weight: 400; font-size: 46px; letter-spacing: 0; }
+.cnb.cnb-sd .cnb-stat.warn b { color: var(--cnb-ink); text-decoration: underline wavy; text-decoration-thickness: 1px; text-underline-offset: 8px; }
+.cnb.cnb-sd .cnb-stat.on, .cnb.cnb-sd .cnb-stat.on:hover { box-shadow: none; background: var(--cnb-soft); }
+
+/* 分隔行：双细线 + 衬线标题 */
+.cnb.cnb-sd .cnb-sec { margin: 30px 0 4px; padding-top: 18px; border-top: 4px double var(--cnb-ink); }
+.cnb.cnb-sd .cnb-sec-t { font-family: var(--sd-roman); font-weight: 400; font-size: 26px; letter-spacing: .04em; }
+.cnb.cnb-sd .cnb-sec-t span { font-family: var(--sd-wide); font-size: 10px; letter-spacing: .16em; }
+.cnb.cnb-sd .cnb-folders button { font-size: 11.5px; letter-spacing: .12em; color: var(--cnb-ink); }
+.cnb.cnb-sd .cnb-folders button.on, .cnb.cnb-sd .cnb-folders button.on:hover { background: transparent; box-shadow: inset 0 0 0 1px var(--cnb-ink); }
+.cnb.cnb-sd .cnb-clear { color: var(--cnb-ink); text-decoration: underline; text-underline-offset: 3px; }
+
+/* 便签 */
+.cnb.cnb-sd .cnb-text { font-weight: 400; letter-spacing: .03em; }
+.cnb.cnb-sd .cnb-pin .cnb-text { font-family: var(--sd-roman); font-weight: 400; font-size: 24px; line-height: 1.3; }
+.cnb.cnb-sd blockquote.cnb-text { border-left-color: var(--cnb-ink); }
+.cnb.cnb-sd .cnb-foot { font-family: var(--sd-wide); font-size: 9.5px; letter-spacing: .1em; color: var(--cnb-mute); }
+.cnb.cnb-sd .cnb-tags button { font-family: var(--font-interface); font-size: 11px; letter-spacing: .1em; color: var(--cnb-ink); }
+.cnb.cnb-sd .cnb-more { border-radius: 0; }
+.cnb.cnb-sd .cnb-note.drag-over { box-shadow: inset 0 0 0 1px var(--cnb-ink); }
+.cnb.cnb-sd .cnb-tagcloud button { border-radius: 999px; background: transparent; box-shadow: inset 0 0 0 1px var(--cnb-line); letter-spacing: .1em; }
+.cnb.cnb-sd .cnb-tagcloud button:hover { background: var(--cnb-soft); }
+
+/* 日历、自由视图上方的筛选条 */
+.cnb.cnb-sd .cnb-chips button { border-color: var(--cnb-ink); background: transparent; letter-spacing: .1em; color: var(--cnb-ink); }
+.cnb.cnb-sd .cnb-chips button.warn em { text-decoration: underline wavy; }
+
+/* 自由拖拽：便签在画布上要有边，才看得出一张一张 */
+.cnb.cnb-sd .cnb-canvas { border-radius: 0; border-color: var(--cnb-ink); background-image: repeating-linear-gradient(90deg, rgba(var(--sd-ink), .12) 0 1px, transparent 1px 6px); background-size: auto; }
+.cnb.cnb-sd .cnb-free { padding: 12px; border: 1px solid var(--cnb-ink); background: var(--cnb-card); }
+.cnb.cnb-sd .cnb-free.lifted { box-shadow: 4px 4px 0 rgba(var(--sd-ink), .35); }
+
+/* 菜单 */
+.cnb.cnb-sd .cn-note-menu, .cnb.cnb-sd .cn-color-menu, .cnb.cnb-sd .cn-style-menu { border-radius: 0; border-color: var(--cnb-ink); }
+
+/* 日历 */
+.cnb.cnb-sd .cn-calendar-wrapper { padding: 16px 0 0; border: 0; border-top: 4px double var(--cnb-ink); border-radius: 0; background: transparent; }
+.cnb.cnb-sd .cn-calendar-month-year { font-family: var(--sd-roman); font-weight: 400; font-size: 24px; }
+.cnb.cnb-sd .cn-calendar-nav-btn { border-radius: 0; background: transparent; border: 1px solid var(--cnb-line); }
+.cnb.cnb-sd .cn-calendar-day, .cnb.cnb-sd .cn-calendar-day.has-notes { border-radius: 0; border: 1px solid var(--cnb-line); background: transparent; }
+.cnb.cnb-sd .cn-calendar-day.today { border-color: var(--cnb-ink); background: var(--cnb-soft); }
+.cnb.cnb-sd .cn-calendar-notes-panel, .cnb.cnb-sd .cn-calendar-note-item { border-radius: 0; }
+
+/* 回收站 */
+.cnb.cnb-sd .cn-trash-header, .cnb.cnb-sd .cn-trash-actions, .cnb.cnb-sd .cn-trash-item { border-radius: 0; background: transparent; }
+
+/* 窄侧栏 */
+@container (max-width: 560px) {
+  .cnb.cnb-sd .cnb-bento { gap: 0 16px; }
+  .cnb.cnb-sd .cnb-tile { padding: 12px 0 10px; border-radius: 0; }
+  .cnb.cnb-sd .cnb-big { font-size: 46px; }
+  .cnb.cnb-sd .cnb-stat b { font-size: 36px; }
+}
+.cnb.cnb-sd .cnb-seg button.on, .cnb.cnb-sd .cnb-seg button.on:hover { color: var(--cnb-bg); }

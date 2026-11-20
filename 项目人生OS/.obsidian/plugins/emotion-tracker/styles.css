@@ -877,3 +877,127 @@
 .mf-modal.mf-s-radio .mf-ib { background: #1a1206; box-shadow: inset 0 2px 8px rgba(0, 0, 0, .7), 0 0 0 1px rgba(255, 179, 71, .2); }
 .mf-modal.mf-s-radio .mf-ib textarea { color: #ffb347 !important; -webkit-text-fill-color: #ffb347 !important; }
 .mf-modal:is(.mf-s-journal, .mf-s-spectrum) .mf-ib::before, .mf-modal:is(.mf-s-journal, .mf-s-spectrum) .mf-ib::after { display: none; }
+
+/* ═══════════ 沙金（1.3.0）：和「项目人生系统」主页的沙金风格一致 ═══════════
+   沙金 + 深咖啡两色（夜晚深底沙金线，白天反过来，跟 Obsidian 明暗主题）；强度、今天的时间带、语音波形都是竖线；
+   字体借用「项目人生系统」插件随附的 PLH Wide / PLH Roman。记录、统计、主题页靠下面这组颜色变量换装。 */
+.mf-modal.mf-s-sand {
+  --sd-paper: #a89474; --sd-deep: #9c8868; --sd-ink: 44, 40, 36;
+  --sd-wide: "PLH Wide", "Michroma", "Eurostile", "Arial Black", var(--mf-ui);
+  --sd-roman: "PLH Roman", "Marcellus", var(--mf-serif);
+  --theme-bg1: var(--sd-paper); --theme-bg2: var(--sd-paper); --theme-accent: rgb(var(--sd-ink)); --mf-ink: var(--sd-ink); --mf-deep: var(--sd-deep);
+  font-family: var(--mf-ui);
+}
+.theme-dark .mf-modal.mf-s-sand { --sd-paper: #2c2824; --sd-deep: #24201c; --sd-ink: 168, 148, 116; }
+.mf-modal.mf-s-sand .mf-pg-bg, .mf-modal.mf-s-sand .mf-in-bg { background: var(--sd-paper); }
+.mf-modal.mf-s-sand .mf-hd-t, .mf-modal.mf-s-sand .mf-q { font-family: var(--sd-roman); font-weight: 400; letter-spacing: .04em; }
+.mf-modal.mf-s-sand .mf-mo-glow { display: none; }
+.mf-modal.mf-s-sand .mf-mo { border-radius: 0; box-shadow: 0 0 0 1px rgb(var(--sd-ink)) !important; animation: none; }
+.mf-modal.mf-s-sand .mf-nav { background: none; justify-content: space-between; margin: 0 22px; padding: 12px 0 18px; border-top: 4px double rgb(var(--sd-ink)); }
+.mf-modal.mf-s-sand .mf-nb { padding: 4px 0; color: rgba(var(--sd-ink), .7); }
+.mf-modal.mf-s-sand .mf-nb .mf-ni { display: none; }
+.mf-modal.mf-s-sand .mf-nb span { font: 10px var(--sd-wide); letter-spacing: .18em; }
+.mf-modal.mf-s-sand .mf-nb.active { color: rgb(var(--sd-ink)); text-decoration: underline; text-underline-offset: 5px; }
+.mf-sp-sand { background: repeating-linear-gradient(90deg, #2c2824 0 3px, transparent 3px 6px) 0 100% / 100% 55% no-repeat, linear-gradient(#2c2824, #2c2824) 8px 10px / 40% 4px no-repeat, #a89474; box-shadow: inset 0 0 0 1px rgba(44, 40, 36, .35); }
+
+/* 三屏共用 */
+.mf-modal.mf-s-sand .mf-home, .mf-modal.mf-s-sand .mf-v, .mf-modal.mf-s-sand .mf-c { color: rgb(var(--sd-ink)); background: var(--sd-paper); }
+.mf-modal .mf-sd-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 20px 24px 12px; font: 10px var(--sd-wide); letter-spacing: .18em; text-transform: uppercase; }
+.mf-modal .mf-sd-top .r { display: inline-flex; align-items: center; gap: 8px; }
+.mf-modal .mf-sd-rule { flex: none; margin: 0 24px; height: 4px; border-top: 1px solid rgb(var(--sd-ink)); border-bottom: 1px solid rgb(var(--sd-ink)); }
+.mf-modal .mf-sd-hero, .mf-modal .mf-sd-lvl, .mf-modal .mf-sd-day { display: grid; gap: 8px; padding: 14px 24px 2px; }
+.mf-modal .mf-sd-k { font: 10px var(--sd-wide); letter-spacing: .18em; text-transform: uppercase; opacity: .85; }
+.mf-modal .mf-sd-hero b { font: 400 54px/1.05 var(--sd-roman); letter-spacing: .08em; }
+.mf-modal .mf-sd-hero .w { font-size: 13px; letter-spacing: .1em; opacity: .85; }
+
+/* 强度：十根竖线，越往右越高；选到的强度以内是粗线 */
+.mf-modal .mf-sd-bars { display: flex; align-items: flex-end; gap: 6px; height: 54px; }
+.mf-modal.mf-s-sand .mf-sd-bars button { flex: 1; min-width: 0; background: repeating-linear-gradient(90deg, rgba(var(--sd-ink), .55) 0 1px, transparent 1px 5px); }
+.mf-modal.mf-s-sand .mf-sd-bars button.f { background: repeating-linear-gradient(90deg, rgb(var(--sd-ink)) 0 3.5px, transparent 3.5px 5px); }
+.mf-modal.mf-s-sand .mf-sd-bars button.cur { outline: 1px dashed rgb(var(--sd-ink)); outline-offset: 3px; }
+.mf-modal .mf-sd-bars button:nth-child(1) { height: 18%; } .mf-modal .mf-sd-bars button:nth-child(2) { height: 27%; }
+.mf-modal .mf-sd-bars button:nth-child(3) { height: 36%; } .mf-modal .mf-sd-bars button:nth-child(4) { height: 45%; }
+.mf-modal .mf-sd-bars button:nth-child(5) { height: 54%; } .mf-modal .mf-sd-bars button:nth-child(6) { height: 63%; }
+.mf-modal .mf-sd-bars button:nth-child(7) { height: 72%; } .mf-modal .mf-sd-bars button:nth-child(8) { height: 81%; }
+.mf-modal .mf-sd-bars button:nth-child(9) { height: 90%; } .mf-modal .mf-sd-bars button:nth-child(10) { height: 100%; }
+
+/* 情绪清单：细线分隔，左边是该情绪颜色的竖线色块 */
+/* 两列，弹窗只有 640 高，两列才放得下「今天」和下面的按钮 */
+.mf-modal .mf-sd-list { display: grid; grid-template-columns: 1fr 1fr; column-gap: 22px; margin: 14px 24px 0; border-top: 1px solid rgba(var(--sd-ink), .45); }
+.mf-modal.mf-s-sand .mf-sd-list button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 0; border-bottom: 1px solid rgba(var(--sd-ink), .45); font-size: 14px; letter-spacing: .12em; text-align: left; }
+.mf-modal .mf-sd-list i { flex: none; width: 16px; height: 10px; background: repeating-linear-gradient(90deg, var(--c) 0 2px, transparent 2px 4px); }
+.mf-modal .mf-sd-list span { flex: 1; min-width: 0; }
+.mf-modal .mf-sd-list em { font-style: normal; font-size: 12px; }
+.mf-modal .mf-sd-list .on span { font-family: var(--sd-roman); font-size: 18px; letter-spacing: .08em; }
+
+/* 今天：24 小时的竖线时间带，记过的时刻是一小簇粗线，高度是强度 */
+.mf-modal .mf-sd-day .bar { position: relative; height: 42px; background: repeating-linear-gradient(90deg, rgba(var(--sd-ink), .5) 0 1px, transparent 1px 6px) left bottom / 100% 35% no-repeat; }
+.mf-modal .mf-sd-day .bar i { position: absolute; bottom: 0; width: 11px; height: var(--h, 60%); transform: translateX(-50%); background: repeating-linear-gradient(90deg, rgb(var(--sd-ink)) 0 3px, transparent 3px 5px); }
+.mf-modal .mf-sd-day .bar i.now { width: 2px; height: 100%; background: rgb(var(--sd-ink)); }
+.mf-modal .mf-sd-day .lab { display: flex; justify-content: space-between; font: 9px var(--sd-wide); letter-spacing: .14em; }
+
+/* 按钮：实心胶囊 + 细线胶囊 */
+/* 按钮钉在底部：内容再长，「说出来」也一直看得见 */
+.mf-modal .mf-sd-acts { position: sticky; bottom: 0; z-index: 2; display: flex; gap: 10px; margin-top: auto; padding: 16px 24px 12px; background: var(--sd-paper); }
+.mf-modal.mf-s-sand .mf-sd-acts .pri { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 46px; border-radius: 999px !important; background: rgb(var(--sd-ink)) !important; color: var(--sd-paper) !important; font: 10.5px var(--sd-wide); letter-spacing: .18em; }
+.mf-modal.mf-s-sand .mf-sd-acts .pri span { display: inline-flex; }
+.mf-modal.mf-s-sand .mf-sd-acts .pri svg { width: 16px; height: 16px; }
+.mf-modal.mf-s-sand .mf-sd-acts .sec { height: 46px; padding: 0 22px !important; border-radius: 999px !important; box-shadow: inset 0 0 0 1px rgb(var(--sd-ink)) !important; font: 10.5px var(--sd-wide); letter-spacing: .18em; }
+.mf-modal.mf-s-sand .mf-c-skip { display: block; margin: 12px auto 4px; font: 10px var(--sd-wide); letter-spacing: .18em; text-decoration: underline; text-underline-offset: 4px; opacity: .85; }
+
+/* 语音对话 */
+.mf-modal .mf-sd-wave { margin: 18px 24px 0; cursor: pointer; }
+.mf-modal .mf-sd-wave canvas { display: block; width: 100%; height: auto; }
+.mf-modal .mf-sd-qa { display: grid; gap: 12px; padding: 16px 24px 0; }
+.mf-modal .mf-sd-qa p { display: grid; gap: 4px; margin: 0; padding-top: 10px; border-top: 1px solid rgba(var(--sd-ink), .45); font-size: 14px; line-height: 1.7; }
+.mf-modal .mf-sd-qa span:empty::after { content: "…"; opacity: .5; }
+.mf-modal .mf-sd-ctl { display: flex; gap: 10px; padding: 18px 24px 4px; }
+.mf-modal.mf-s-sand .mf-sd-ctl button { flex: 1; height: 42px; border-radius: 999px !important; box-shadow: inset 0 0 0 1px rgb(var(--sd-ink)) !important; font: 10.5px var(--sd-wide); letter-spacing: .18em; }
+.mf-modal.mf-s-sand .mf-sd-ctl .end, .mf-modal.mf-s-sand .mf-sd-ctl .mute.on { background: rgb(var(--sd-ink)) !important; color: var(--sd-paper) !important; }
+.mf-modal.mf-s-sand .mf-v-err { border-radius: 0; background: rgba(var(--sd-ink), .1); }
+.mf-modal.mf-s-sand .mf-v-rec { border-radius: 999px; box-shadow: inset 0 0 0 1px rgba(var(--sd-ink), .6); background: transparent; }
+
+/* 记下这条 */
+.mf-modal.mf-s-sand .mf-c-note { margin: 16px 24px 0; width: calc(100% - 48px); padding: 8px 0; border: 0; border-bottom: 1px solid rgb(var(--sd-ink)); border-radius: 0; background: transparent; color: rgb(var(--sd-ink)); font-size: 14px; line-height: 1.7; box-shadow: none; }
+.mf-modal.mf-s-sand .mf-c-note::placeholder { color: rgba(var(--sd-ink), .6); }
+.mf-modal.mf-s-sand .mf-c-dest { font-family: var(--sd-wide); font-size: 9.5px; letter-spacing: .08em; opacity: .75; }
+/* 底部导航那一条也要是沙金底：插件把弹窗本体设成透明，这里给沙金单独补上 */
+.mf-root .modal-content.mf-modal.mf-s-sand { background: var(--sd-paper) !important; }
+
+/* 记录 / 统计 / 主题 / 写一句：卡片拍平成细线格、圆角去掉；选中的按钮实心，字用底色（原来字和强调色同色会看不见） */
+.mf-modal.mf-s-sand :is(.mf-mc, .mf-num, .mf-health-card, .mf-trend-chart, .mf-time-card, .mf-ts, .mf-cd, .mf-sp, .mf-tb, .mf-voice-row, .mf-ib) {
+  border-radius: 0 !important; background: transparent !important; box-shadow: none !important; backdrop-filter: none !important; border: 1px solid rgba(var(--sd-ink), .45) !important;
+}
+.mf-modal.mf-s-sand .mf-sp.on, .mf-modal.mf-s-sand .mf-tb.on { border-color: rgb(var(--sd-ink)) !important; box-shadow: inset 0 0 0 1px rgb(var(--sd-ink)) !important; }
+.mf-modal.mf-s-sand .mf-ib::before, .mf-modal.mf-s-sand .mf-ib::after { display: none; }
+.mf-modal.mf-s-sand :is(.mf-range-btn, .mf-filter-btn, .mf-share-today-btn, .mf-back) { border-radius: 999px; background: transparent; border: 1px solid rgb(var(--sd-ink)); color: rgb(var(--sd-ink)); box-shadow: none; transform: none; }
+.mf-modal.mf-s-sand :is(.mf-range-btn.active, .mf-filter-btn.active, .mf-share-today-btn, .mf-int-row button.on, .mf-sb, .mf-tgl.on) { background: rgb(var(--sd-ink)) !important; color: var(--sd-paper) !important; }
+.mf-modal.mf-s-sand .mf-sb { border-radius: 999px; }
+.mf-modal.mf-s-sand .mf-sb svg { color: var(--sd-paper); }
+.mf-modal.mf-s-sand .mf-tgl::after { background: var(--sd-paper); }
+.mf-modal.mf-s-sand .mf-int-row button { border-radius: 0; background: rgba(var(--sd-ink), .08) !important; color: rgb(var(--sd-ink)); }
+.mf-modal.mf-s-sand .mf-eb-btn { border-radius: 0; background: transparent; border: 1px solid rgba(var(--sd-ink), .35); box-shadow: none; transform: none; }
+.mf-modal.mf-s-sand .mf-eb-btn.on { border-color: rgb(var(--sd-ink)); background: rgba(var(--sd-ink), .1); box-shadow: none; }
+.mf-modal.mf-s-sand :is(.mf-cd-icon, .mf-ts-i, .mf-time-mood) { border-radius: 0 !important; }
+.mf-modal.mf-s-sand .mf-time-mood { background: transparent !important; box-shadow: inset 0 0 0 1px rgb(var(--sd-ink)); color: rgb(var(--sd-ink)); }
+.mf-modal.mf-s-sand .mf-mc-icon { color: rgb(var(--sd-ink)) !important; }
+.mf-modal.mf-s-sand .mf-mc-p { background: none; -webkit-text-fill-color: currentColor; color: rgb(var(--sd-ink)); font: 400 34px var(--sd-roman); }
+.mf-modal.mf-s-sand :is(.mf-num-v, .mf-mc-n) { font-family: var(--sd-roman); font-weight: 400; }
+.mf-modal.mf-s-sand .mf-health-ring { --color: rgb(var(--sd-ink)) !important; }
+/* 情绪自己的颜色只留在一小条竖线色块里，图标和字都用墨色，白天沙金底上才看得清 */
+.mf-modal.mf-s-sand :is(.mf-cd-icon, .mf-ts-icon, .mf-eb-icon) { color: rgb(var(--sd-ink)) !important; }
+.mf-modal.mf-s-sand .mf-cd-icon { background: repeating-linear-gradient(90deg, var(--cc) 0 2px, transparent 2px 4px) left bottom / 100% 4px no-repeat !important; }
+.mf-modal.mf-s-sand .mf-ts-i { background: repeating-linear-gradient(90deg, var(--tc) 0 2px, transparent 2px 4px) left bottom / 100% 4px no-repeat !important; }
+.mf-modal.mf-s-sand .mf-eb-btn { background: repeating-linear-gradient(90deg, var(--ec, transparent) 0 2px, transparent 2px 4px) left bottom / 100% 3px no-repeat; }
+.mf-modal.mf-s-sand .mf-eb-btn.on { background: repeating-linear-gradient(90deg, var(--ec, transparent) 0 2px, transparent 2px 4px) left bottom / 100% 3px no-repeat, rgba(var(--sd-ink), .1); }
+.mf-modal.mf-s-sand :is(.mf-cd-n, .mf-eb-nm, .mf-eb-btn.on .mf-eb-nm) { color: rgb(var(--sd-ink)) !important; }
+.mf-modal.mf-s-sand .mf-gw { color: rgba(var(--sd-ink), .85) !important; }
+.mf-modal.mf-s-sand .mf-ta { color: rgb(var(--sd-ink)) !important; -webkit-text-fill-color: rgb(var(--sd-ink)) !important; }
+.mf-modal.mf-s-sand .mf-ta::placeholder { color: rgba(var(--sd-ink), .55) !important; -webkit-text-fill-color: rgba(var(--sd-ink), .55) !important; }
+.mf-modal.mf-s-sand :is(.mf-cd-tm, .mf-ts-t, .mf-cd-tx) { color: rgba(var(--sd-ink), .75); }
+/* 写一句页的心情方块：本身的颜色上压一层底色竖线，变成网屏色块 */
+.mf-modal.mf-s-sand .mf-mo { position: relative; box-shadow: 0 0 0 1px rgb(var(--sd-ink)) !important; }
+.mf-modal.mf-s-sand .mf-mo::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent 0 3.5px, var(--sd-paper) 3.5px 5px); }
+/* 小字原来只有 25%～40% 透明度，沙金底上太淡，统一提到 75% */
+.mf-modal.mf-s-sand :is(.mf-st, .mf-mc-l, .mf-num-l, .mf-health-label, .mf-time-range, .mf-time-count, .mf-set-l, .mf-ds-d, .mf-trend-empty, .mf-cd-tp, .mf-ts-l, .mf-eb-lbl) { color: rgba(var(--sd-ink), .75); }
+.mf-modal.mf-s-sand :is(.mf-st, .mf-set-l) { font: 10px var(--sd-wide); letter-spacing: .18em; }

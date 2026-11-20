@@ -121,11 +121,15 @@ var MF_STYLES = [
   ["orb", "呼吸光球", "深夜里会呼吸的光球，原来的样子"],
   ["journal", "手帐", "方格本、表情贴纸、手写字"],
   ["radio", "深夜电台", "情绪是频道，强度是音量旋钮"],
-  ["spectrum", "情绪色谱", "像色卡一样记录，一天是一条色带"]
+  ["spectrum", "情绪色谱", "像色卡一样记录，一天是一条色带"],
+  ["sand", "沙金", "和主页同一套：竖线网屏、沙金双色，白天夜晚跟主题"]
 ];
+// 沙金的竖线颜色：夜晚深底沙金线，白天沙金底深咖啡线（跟 Obsidian 明暗主题）
+function mfSandInk() { return document.body.classList.contains("theme-dark") ? "#a89474" : "#2c2824"; }
 function mfStyle(settings) { var v = settings && settings.uiStyle; return MF_STYLES.some(function(x) { return x[0] === v; }) ? v : "orb"; }
-var MF_FONTS = { hand: { family: "CNP Hand", file: "hand.woff2" }, mono: { family: "CNP Mono", file: "mono.woff2", desc: { weight: "400" } }, monoBold: { family: "CNP Mono", file: "mono-bold.woff2", desc: { weight: "700" } } };
-var MF_STYLE_FONTS = { orb: [], journal: ["hand", "mono"], radio: ["mono", "monoBold"], spectrum: ["mono", "monoBold"] };
+var MF_FONTS = { hand: { family: "CNP Hand", file: "hand.woff2" }, mono: { family: "CNP Mono", file: "mono.woff2", desc: { weight: "400" } }, monoBold: { family: "CNP Mono", file: "mono-bold.woff2", desc: { weight: "700" } },
+  wide: { family: "PLH Wide", file: "wide.woff2", from: "project-life-dashboard" }, roman: { family: "PLH Roman", file: "roman.woff2", from: "project-life-dashboard" } };
+var MF_STYLE_FONTS = { orb: [], journal: ["hand", "mono"], radio: ["mono", "monoBold"], spectrum: ["mono", "monoBold"], sand: ["wide", "roman"] };
 var MF_WD = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
 var MF_WD_EN = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 function mfEsc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function(c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
@@ -613,11 +617,11 @@ var EmotionTrackerPlugin = class extends import_obsidian.Plugin {
   mfLoadFonts(style) {
     var self = this, need = MF_STYLE_FONTS[style] || [];
     this.mfFonts = this.mfFonts || {};
-    var dir = String((this.manifest && this.manifest.dir) || ".obsidian/plugins/emotion-tracker").replace(/[^/]+$/, "capture-notes") + "/fonts/";
+    var base = String((this.manifest && this.manifest.dir) || ".obsidian/plugins/emotion-tracker").replace(/[^/]+$/, "");
     need.forEach(function(k) {
       if (self.mfFonts[k] || typeof FontFace === "undefined") return;
       var def = MF_FONTS[k]; self.mfFonts[k] = "loading";
-      self.app.vault.adapter.readBinary(dir + def.file).then(function(buf) {
+      self.app.vault.adapter.readBinary(base + (def.from || "capture-notes") + "/fonts/" + def.file).then(function(buf) {
         var face = new FontFace(def.family, buf, def.desc || {});
         return face.load().then(function() { document.fonts.add(face); self.mfFonts[k] = face; });
       }).catch(function() { self.mfFonts[k] = "failed"; });
@@ -3982,6 +3986,15 @@ var MF_MODAL = {
         '<button type="button" class="mf-r-mic" data-act="voice">' + MF_MIC + "开麦</button></div>" +
         '<div class="mf-r-list">' + (today ? today.map(function(t) { return "<span><i>" + t.time + "</i>" + mfEsc(t.name) + (t.n ? " · " + t.n : "") + "</span>"; }).join("") : "<span>今天还没开播</span>") + "</div>" +
         '<button type="button" class="mf-r-type" data-act="write">TYPE · 写一句 ›</button>';
+    } else if (style === "sand") {
+      var nowX = ((now.hours() * 60 + now.minutes()) / 1440 * 100).toFixed(2), todayAll = this.mfToday();
+      var marks = todayAll.map(function(e) { var m = (0, import_obsidian.moment)(e.timestamp), x = (m.hours() * 60 + m.minutes()) / 1440 * 100; return '<i style="left:' + x.toFixed(2) + "%;--h:" + (30 + mfClampInt(e.intensity, 1, 10, 5) * 7) + '%" title="' + mfEsc(m.format("HH:mm") + " " + self.mfEmo(e.emotion).name) + '"></i>'; }).join("");
+      root.innerHTML = '<div class="mf-sd-top"><span>MOOD · 此刻</span><span class="r">' + now.format("MM.DD") + " " + MF_WD_EN[now.day()] + " " + now.format("HH:mm") + music + '</span></div><div class="mf-sd-rule"></div>' +
+        '<div class="mf-sd-hero"><span class="mf-sd-k">此刻的心情</span><b>' + mfEsc(c.name) + '</b><span class="w">' + mfEsc(this.gentleWord || "") + "</span></div>" +
+        '<div class="mf-sd-lvl"><span class="mf-sd-k">强度 · ' + mfPad(lvl) + ' / 10</span><div class="mf-sd-bars">' + [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function(n) { return '<button type="button" data-act="lvl" data-n="' + n + '" class="' + (n <= lvl ? "f" : "") + (n === lvl ? " cur" : "") + '" aria-label="强度 ' + n + '"></button>'; }).join("") + "</div></div>" +
+        '<div class="mf-sd-list">' + keys.map(function(k) { var e = self.mfEmo(k); return '<button type="button" data-act="emo" data-k="' + mfEsc(k) + '" class="' + (k === self.emotion ? "on" : "") + '" style="--c:' + e.color + '"><i></i><span>' + mfEsc(e.name) + "</span><em>" + (k === self.emotion ? "●" : "○") + "</em></button>"; }).join("") + "</div>" +
+        '<div class="mf-sd-day"><span class="mf-sd-k">今天 · ' + todayAll.length + ' 条</span><div class="bar">' + marks + '<i class="now" style="left:' + nowX + '%"></i></div><div class="lab"><span>00</span><span>06</span><span>12</span><span>18</span><span>24</span></div></div>' +
+        '<div class="mf-sd-acts"><button type="button" class="pri" data-act="voice"><span>' + MF_MIC + '</span>说出来</button><button type="button" class="sec" data-act="write">写一句</button></div>';
     } else {
       var code = "PL-" + mfPad(Math.max(0, keys.indexOf(this.emotion)) + 1);
       var band = this.mfToday().map(function(e) { var m = (0, import_obsidian.moment)(e.timestamp), x = (m.hours() * 60 + m.minutes()) / 1440 * 100; return '<i style="left:' + x.toFixed(2) + "%;background:" + self.mfEmo(e.emotion).color + '"></i>'; }).join("");
@@ -4016,6 +4029,11 @@ var MF_MODAL = {
         '<div class="mf-v-vus" data-act="interrupt"><div class="vu"><div class="scale"></div><i class="ndl" data-v="vuYou"></i><b>YOU</b></div><div class="vu"><div class="scale"></div><i class="ndl" data-v="vuAi"></i><b>HOST</b></div></div>' +
         '<div class="mf-v-lcd"><div class="st"><span data-v="status"></span><span data-v="timer">00:00</span></div><div class="you" data-v="you"></div><div class="ai" data-v="ai"></div></div>' + err + rec +
         ctl(MF_MIC + "MUTE", MF_STOP + "OFF AIR", MF_KEYS + "TYPE") + '<div class="mf-v-meta" data-v="meta">对话内容不保存</div>';
+    } else if (style === "sand") {
+      root.innerHTML = '<div class="mf-sd-top"><span data-v="status"></span><span><span data-v="timer">00:00</span> · ELEVENLABS</span></div><div class="mf-sd-rule"></div>' +
+        '<div class="mf-sd-wave" data-act="interrupt"><canvas data-v="viz" width="840" height="300"></canvas></div>' +
+        '<div class="mf-sd-qa"><p class="ai"><span class="mf-sd-k">它</span><span data-v="ai"></span></p><p class="you"><span class="mf-sd-k">你</span><span data-v="you"></span></p></div>' + err + rec +
+        '<div class="mf-sd-ctl"><button type="button" data-act="mute" class="mute">静音</button><button type="button" data-act="type" class="type">打字</button><button type="button" data-act="end" class="end">结束</button></div><div class="mf-v-meta" data-v="meta">对话内容不保存</div>';
     } else {
       root.innerHTML = '<div class="mf-v-top"><span data-v="status"></span><span><span data-v="timer">00:00</span> · ELEVENLABS</span></div>' +
         '<div class="mf-v-wave" data-act="interrupt"><canvas data-v="viz" width="840" height="300"></canvas></div>' +
@@ -4087,6 +4105,7 @@ var MF_MODAL = {
       var cv = self.contentEl.querySelector('canvas[data-v="viz"]');
       if (cv && style === "orb") mfDrawOrb(cv, ph, smooth, ms, speak ? "#9fd8ff" : c);
       if (cv && style === "spectrum") mfDrawLine(cv, ph, smooth, ms, speak ? c : "#111111");
+      if (cv && style === "sand") mfDrawBars(cv, ph, smooth, ms, mfSandInk());
       if (style === "journal") {
         hist.push(ph === "listening" || speak ? smooth : 0.02); hist.shift();
         var pen = self.contentEl.querySelector('[data-v="pen"]');
@@ -4127,6 +4146,11 @@ var MF_MODAL = {
       root.innerHTML = '<div class="mf-r-top"><b>MOOD FM</b><span class="mf-r-onair">ON AIR</span><span class="mf-r-clock">' + (p.secs ? Math.floor(p.secs / 60) + ":" + mfPad(p.secs % 60) : "") + "</span></div>" +
         '<div class="mf-c-jcard"><div class="stripe"></div><div class="in"><div class="h"><span>SIDE A · ' + d.format("MM.DD") + "</span><span>" + d.format("HH:mm") + '</span></div><div class="t"><b>' + mfEsc(c.name) + "</b><span>FM " + (88 + i * 3.9).toFixed(1) + " · VOL " + p.intensity + "</span></div>" + lvlRow("mf-c-vol") + note + "</div></div>" + dest +
         '<div class="mf-c-acts"><button type="button" class="pri" data-act="save">收进节目单</button><button type="button" class="sec" data-act="edit">改一改</button></div><button type="button" class="mf-c-skip" data-act="skip">这段不录</button>';
+    } else if (style === "sand") {
+      root.innerHTML = '<div class="mf-sd-top"><span>记下这一刻</span><span>' + mfEsc(dur) + '</span></div><div class="mf-sd-rule"></div>' +
+        '<div class="mf-sd-hero"><span class="mf-sd-k">' + d.format("MM.DD") + " · " + d.format("HH:mm") + " · " + MF_WD_EN[d.day()] + "</span><b>" + mfEsc(c.name) + "</b></div>" +
+        '<div class="mf-sd-lvl"><span class="mf-sd-k">强度 · ' + mfPad(p.intensity) + " / 10</span>" + lvlRow("mf-sd-bars") + "</div>" + note + dest +
+        '<div class="mf-sd-acts"><button type="button" class="pri" data-act="save">记下</button><button type="button" class="sec" data-act="edit">改一改</button></div><button type="button" class="mf-c-skip" data-act="skip">这次不记</button>';
     } else {
       var code = "PL-" + mfPad(Math.max(0, this.mfKeys().indexOf(p.emotion)) + 1) + " · " + d.format("MMDD") + " · " + d.format("HHmm");
       root.innerHTML = '<div class="mf-p-top"><span>NEW SWATCH</span><span>' + (p.secs ? "聊了 " + Math.floor(p.secs / 60) + ":" + mfPad(p.secs % 60) : "") + "</span></div>" +
@@ -4231,6 +4255,20 @@ function mfDrawLine(cv, ph, amp, ms, color) {
     if (x === 0) g.moveTo(x, y); else g.lineTo(x, y);
   }
   g.stroke();
+}
+// 沙金的语音画面：一排竖线，跟着说话的音量起伏，说得越响线越粗；偶尔往下拖一条细线
+function mfDrawBars(cv, ph, amp, ms, color) {
+  var g = cv.getContext("2d"), W = cv.width, H = cv.height, s = ms / 1000, pw = 10, n = Math.floor(W / pw), mid = H / 2;
+  var calm = ph === "thinking" || ph === "connecting";
+  g.clearRect(0, 0, W, H); g.fillStyle = color;
+  for (var i = 0; i < n; i++) {
+    var u = i / n, env = Math.sin(u * Math.PI);
+    var v = Math.abs(Math.sin(u * 22 + s * 9) * 0.6 + Math.sin(u * 47 - s * 13) * 0.4);
+    var h = H * 0.05 + env * Math.min(1, amp * 1.6) * H * 0.42 * v + (calm ? env * H * 0.08 * (0.5 + 0.5 * Math.sin(u * 8 + s * 4)) : 0);
+    var w = 2 + Math.round(5 * Math.min(1, h / (H * 0.45)));
+    g.fillRect(i * pw + (pw - w) / 2, mid - h, w, h * 2);
+    if ((i * 7919) % 13 === 0) g.fillRect(i * pw + pw / 2 - 0.75, mid + h, 1.5, H * 0.14 * env);
+  }
 }
 var MoodflowSettingTab = class extends import_obsidian.PluginSettingTab {
   constructor(app, plugin) {

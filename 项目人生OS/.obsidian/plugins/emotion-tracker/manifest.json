@@ -1,9 +1,9 @@
 {
   "id": "emotion-tracker",
   "name": "情绪追踪器",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "minAppVersion": "1.1.0",
-  "description": "记录此刻的心情，写进当天日记的「今日情绪」；有光球、手帐、电台、色谱四种风格，还能和 AI 语音聊心情。",
+  "description": "记录此刻的心情，写进当天日记的「今日情绪」；有光球、手帐、电台、色谱、沙金五种风格，还能和 AI 语音聊心情。",
   "author": "爱分享的小师兄",
   "authorUrl": "",
   "isDesktopOnly": false

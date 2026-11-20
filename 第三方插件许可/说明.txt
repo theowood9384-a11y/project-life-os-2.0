@@ -51,7 +51,7 @@ AGPL-3.0 插件的对应版本源代码可在下列仓库的同名版本标签�
   许可：SIL Open Font License 1.1（按常用字裁剪，字形未改）
   许可证原文：项目人生OS/.obsidian/plugins/capture-notes/fonts/字体许可.txt
 
-■ 字体（随「项目人生系统」插件附带，用于对话主界面）
+■ 字体（随「项目人生系统」插件附带，用于对话主界面；捕获便利贴、情绪追踪器的「沙金」风格也读取这两款，不另外打包）
   Michroma、Marcellus
   许可：SIL Open Font License 1.1（拉丁字符子集，字形未改）
   许可证原文：项目人生OS/.obsidian/plugins/project-life-dashboard/fonts/字体许可.txt

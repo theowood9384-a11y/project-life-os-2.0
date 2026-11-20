@@ -287,8 +287,23 @@ var BOARD_STYLES = [
   ["still", "静物", "灰白墙面上的真实纸张；今天是一叠便签本，做完一件撕掉一张"],
   ["jian", "笺", "传统色笺纸，闪念竖排；做完盖一方朱印，笺纸对折收走"],
   ["riso", "孔版", "荧光油墨套印，便签重叠处会混色；做完揉成纸团，投进 DONE 筐"],
-  ["simple", "简洁", "Bento 分区卡片，和主页同一套样式"]
+  ["simple", "简洁", "Bento 分区卡片，和主页经典样式一致"],
+  ["sand", "沙金", "和主页沙金风格一致：沙金双色、细线分段、竖线色块"]
 ];
+// 「简洁」和「沙金」都是 Bento 分区（同一套渲染和交互），沙金只是多一层皮肤（.cnb-sd）
+function cnpFlat(style) { return style === "simple" || style === "sand"; }
+// 沙金用「项目人生系统」插件随附的两款开源字体（fonts/wide.woff2、roman.woff2）；读不到就用系统字体
+var CNP_SAND_FONTS = false;
+function cnpLoadSandFonts(plugin) {
+  if (CNP_SAND_FONTS || typeof FontFace === "undefined") return;
+  CNP_SAND_FONTS = true;
+  var have = function(name) { var ok = false; document.fonts.forEach(function(f) { if (String(f.family).replace(/["']/g, "") === name) ok = true; }); return ok; };
+  var dir = String((plugin.manifest && plugin.manifest.dir) || ".obsidian/plugins/capture-notes").replace(/[^/]+$/, "project-life-dashboard") + "/fonts/";
+  [["PLH Wide", "wide.woff2"], ["PLH Roman", "roman.woff2"]].forEach(function(f) {
+    if (have(f[0]) || !plugin.app.vault.adapter.readBinary) return;
+    plugin.app.vault.adapter.readBinary(dir + f[1]).then(function(buf) { var face = new FontFace(f[0], buf); return face.load().then(function(x) { document.fonts.add(x); }); }).catch(function() {});
+  });
+}
 function cnpStyle(settings) {
   var v = settings && settings.boardStyle;
   return BOARD_STYLES.some(function(x) { return x[0] === v; }) ? v : "journal";
@@ -303,7 +318,7 @@ var CNP_FONT_FILES = {
   mono: { family: "CNP Mono", file: "mono.woff2", desc: { weight: "400" } },
   monoBold: { family: "CNP Mono", file: "mono-bold.woff2", desc: { weight: "700" } }
 };
-var CNP_STYLE_FONTS = { journal: ["hand", "brush", "mono", "monoBold"], still: ["hand", "mono"], jian: ["xiaowei", "brush", "mono"], riso: ["anton", "mono", "monoBold"], simple: [] };
+var CNP_STYLE_FONTS = { journal: ["hand", "brush", "mono", "monoBold"], still: ["hand", "mono"], jian: ["xiaowei", "brush", "mono"], riso: ["anton", "mono", "monoBold"], simple: [], sand: [] };
 var JIAN_COLOR_NAMES = { sunrise: "缃色", blossom: "藕荷", ocean: "月白", mint: "青白", lavender: "丁香", slate: "霜色", rose: "杏红", amber: "牙色" };
 var CNP_WD = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
 var CNP_WD_EN = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
@@ -1669,9 +1684,11 @@ var CaptureNotesView = class extends import_obsidian.ItemView {
     container.addClass("cn-container");
     container.addClass("cnb");
     ["journal", "still", "jian", "riso"].forEach(function(k) { container.classList.toggle("cnp-" + k, k === style); });
-    container.classList.toggle("cnp", style !== "simple");
+    container.classList.toggle("cnp", !cnpFlat(style));
+    container.classList.toggle("cnb-sd", style === "sand");
+    if (style === "sand") cnpLoadSandFonts(this.plugin);
     this.fxEl.className = "cnp-fx cnp cnp-" + style;
-    if (style !== "simple") { this.plugin.cnpLoadFonts(style); this.cnpRender(container, style); }
+    if (!cnpFlat(style)) { this.plugin.cnpLoadFonts(style); this.cnpRender(container, style); }
     else {
       this.renderTop(container);
       if (this.showTrash) { this.renderTrash(container); }
@@ -1682,7 +1699,7 @@ var CaptureNotesView = class extends import_obsidian.ItemView {
     container.scrollTop = scroll;
     // 搜索时每输入一个字都会重绘，这里把光标放回搜索框
     if (refocus) { var q = container.querySelector(".cnb-q"); if (q) { q.focus(); try { q.setSelectionRange(caret, caret); } catch (e) {} } }
-    if (style !== "simple") this.cnpEnter(style); else this.cnpKnown = null;
+    if (!cnpFlat(style)) this.cnpEnter(style); else this.cnpKnown = null;
   }
 
   renderTop(container) {
@@ -2159,7 +2176,7 @@ var CaptureNotesView = class extends import_obsidian.ItemView {
     if (existing) { existing.remove(); return; }
     var menu = sticky.createDiv({ cls: "cn-note-menu" });
     var items = [
-      { icon: "✓", text: note.completed ? "改回未完成" : "标记完成", action: function() { if (!note.completed && cnpStyle(self.plugin.settings) !== "simple") self.cnpComplete(note.id, "wall"); else self.plugin.toggleNoteComplete(note.id, note.completed ? null : sticky); } },
+      { icon: "✓", text: note.completed ? "改回未完成" : "标记完成", action: function() { if (!note.completed && !cnpFlat(cnpStyle(self.plugin.settings))) self.cnpComplete(note.id, "wall"); else self.plugin.toggleNoteComplete(note.id, note.completed ? null : sticky); } },
       { icon: "✏️", text: "编辑", action: function() { new EditNoteModal(self.app, self.plugin, note).open(); } },
       { icon: note.pinned ? "📍" : "📌", text: note.pinned ? "取消置顶" : "置顶", action: function() { self.plugin.toggleNotePin(note.id); } },
       { icon: "📅", text: "设置到期", action: function() { new SetDueDateModal(self.app, self.plugin, note).open(); } },
@@ -2493,7 +2510,7 @@ var CNP_VIEW = {
   },
   // 先记下每张便签的位置，改完数据重画后，让它们从旧位置滑到新位置
   cnpFlip: function(fn) {
-    var paper = cnpStyle(this.plugin.settings) !== "simple", before = paper ? this.cnpRects() : null;
+    var paper = !cnpFlat(cnpStyle(this.plugin.settings)), before = paper ? this.cnpRects() : null;
     fn();
     if (!paper || cnpReduced()) return;
     this.containerEl.children[1].querySelectorAll("[data-k]").forEach(function(el) {
